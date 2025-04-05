@@ -1,11 +1,15 @@
 # 🎸 Scales.nvim
 
+> 🎵 *"You want to be like     [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/L9r-NxuYszg/0.jpg)](https://www.youtube.com/watch?v=L9r-NxuYszg&t=307) in your next interview? Start with the basics."*
+
 Practice coding patterns like a musician practices scales. Just as guitarists master scales to build muscle memory and improvisation skills, this Neovim plugin helps you master common coding patterns through deliberate practice.
 
 ![Scales.nvim Overview](docs/scales_overview.png)
 *Scales.nvim in action: Pattern selection (top-left), Practice implementation (top-right), Validation feedback (bottom)*
 
 ## 🎵 Why Practice Scales?
+
+> 🎸 *"You wouldn't try to play ['Eruption'](https://youtu.be/L9r-NxuYszg?si=ZiNbsVDLcTxvqY40&t=307) without learning your scales first. Don't try to solve complex problems without mastering the basics."*
 
 Every great musician knows that mastering scales is the foundation of musical excellence. Similarly, in coding:
 
@@ -16,6 +20,8 @@ Every great musician knows that mastering scales is the foundation of musical ex
 
 ## ✨ Features
 
+> 🎵 *"Building your foundation to rock any interview"*
+
 - 🎯 Practice common coding patterns (like practicing scales)
 - ⏱️ Track your practice time (like a metronome)
 - ✅ Validate your implementations (like playing along with a backing track)
@@ -24,7 +30,20 @@ Every great musician knows that mastering scales is the foundation of musical ex
 - 🎚️ Difficulty-based pattern selection (like progressive exercises)
 - 🎛️ Customizable templates and configurations
 
+## 🎸 Scales vs. Solos
+
+> 🎵 *"Master the scales, and the solos will follow"*
+
+| Scales (Fundamentals) | Solos (Complex Problems) |
+|----------------------|-------------------------|
+| Binary Search | Dynamic Programming |
+| Two Pointers | Graph Algorithms |
+| Sliding Window | Backtracking |
+| Prefix Sum | Advanced Data Structures |
+
 ## 📦 Installation
+
+> 🎸 *"Time to tune up your coding skills"*
 
 ### Prerequisites
 - [Neovim](https://neovim.io/) (version 0.8.0 or higher)
@@ -108,6 +127,8 @@ require('scales').setup({
 
 ## 🎹 Usage
 
+> 🎵 *"Practice until you can play it in your sleep"*
+
 ### Understanding Key Mappings
 - `<leader>` is like your capo - it changes how other keys work
 - For example, `<leader>sg` means press `\` then `s` then `g`
@@ -179,46 +200,58 @@ You can use these commands in Neovim's command mode (press `:` to enter command 
    ![Statistics View](docs/statistics.png)
    *Track your progress and achievements*
 
+> 🎸 *"The more you practice, the luckier you get"*
+
 ### Pattern Difficulty Levels
 
 ![Pattern Selection Interface](docs/pattern_selection.gif)
 *Pattern selection interface showing difficulty levels with star ratings:*
 
 - 🎸 **Beginner Patterns** (1-2 stars)
-  - [1] Binary Search
-    - Practice binary search technique
-  - [2] Two Pointers Opposite Directions
-    - Practice two pointers opposite directions technique
+  - [1] Sliding Window Fixed Size
+    - Practice sliding window fixed size technique
   - [2] Two Pointers Same Directions
     - Practice two pointers same directions technique
+  - [2] Two Pointers Opposite Directions
+    - Practice two pointers opposite directions technique
+  - [3] Binary Search
+    - Practice binary search technique
 
 - 🎵 **Intermediate Patterns** (3-4 stars)
-  - [3] Sliding Window Fixed Size
-    - Practice sliding window fixed size technique
-  - [3] Sliding Window Flexible Longest
-    - Practice sliding window flexible longest technique
-  - [3] Sliding Window Flexible Shortest
-    - Practice sliding window flexible shortest technique
-  - [4] Prefix Sum
-    - Practice prefix sum technique
-  - [5] DFS on Tree
+  - [4] DFS on Tree
     - Practice depth-first search on tree technique
-  - [6] Backtracking
-    - Practice backtracking technique
-  - [7] BFS on Tree
+  - [5] BFS on Tree
     - Practice breadth-first search on tree technique
+  - [6] Sliding Window Flexible Longest
+    - Practice sliding window flexible longest technique
+  - [7] Sliding Window Flexible Shortest
+    - Practice sliding window flexible shortest technique
+  - [8] Prefix Sum
+    - Practice prefix sum technique
+  - [9] DFS on Graph
+    - Practice depth-first search on graph technique
+  - [10] BFS on Graph
+    - Practice breadth-first search on graph technique
+  - [11] BFS on Matrix
+    - Practice breadth-first search on matrix technique
 
 - 🎼 **Advanced Patterns** (5 stars)
-  - [8] Topological Sort
+  - [12] Backtracking Basic
+    - Practice basic backtracking technique
+  - [13] Backtracking Aggregation
+    - Practice backtracking with aggregation
+  - [14] Topological Sort
     - Practice topological sort technique
-  - [90] DP Top Down
-    - Practice dp top down technique
-  - [90] Union Find
+  - [15] Union Find
     - Practice union find technique
-  - [91] Trie
+  - [16] Trie
     - Practice trie technique
-  - [92] Monotonic Stack
+  - [17] Monotonic Stack
     - Practice monotonic stack technique
+  - [18] DP Top Down
+    - Practice dynamic programming top-down technique
+  - [19] DP Bottom Up
+    - Practice dynamic programming bottom-up technique
 
 Each pattern includes:
 - Visual difficulty indicator (⭐)
@@ -228,6 +261,8 @@ Each pattern includes:
 - Template implementation for validation
 
 ## 🏆 Achievements
+
+> 🎵 *"Practice until you can't get it wrong"*
 
 Earn badges and achievements as you practice:
 
@@ -266,6 +301,8 @@ Templates are stored here:
 ```
 
 ## 🚀 Tips for Success
+
+> 🎸 *"The secret to getting ahead is getting started"*
 
 1. **Start with easier patterns** and gradually increase difficulty (like learning scales)
 2. **Focus on understanding** the pattern before optimizing speed
