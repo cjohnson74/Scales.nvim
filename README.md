@@ -3,7 +3,6 @@
 > 🎵 *"You want to be like this in your next interview? Start with the basics."*
 
 [![Eruption - Eddie Van Halen](https://img.youtube.com/vi/L9r-NxuYszg/0.jpg)](https://www.youtube.com/watch?v=L9r-NxuYszg&t=512)
-*Click to watch Eddie Van Halen's legendary "Eruption" solo*
 
 Practice coding patterns like a musician practices scales. Just as guitarists master scales to build muscle memory and improvisation skills, this Neovim plugin helps you master common coding patterns through deliberate practice.
 
