@@ -31,7 +31,7 @@ function M.validate_practice()
     local current_file = vim.api.nvim_buf_get_name(current_buf)
     
     if not current_file or current_file == '' then
-        vim.notify("No file is currently open", vim.log.levels.ERROR)
+        vim.notify("No file open", vim.log.levels.ERROR)
         return
     end
     
@@ -41,7 +41,7 @@ function M.validate_practice()
             vim.cmd('write')
         end)
         if not success then
-            vim.notify("Failed to save file before validation", vim.log.levels.ERROR)
+            vim.notify("Failed to save file", vim.log.levels.ERROR)
             return
         end
     end
@@ -50,7 +50,7 @@ function M.validate_practice()
     local template_file = pattern_dir .. "/template.py"
     
     if vim.fn.filereadable(template_file) == 0 then
-        vim.notify("Template file not found: " .. template_file, vim.log.levels.ERROR)
+        vim.notify("Template not found", vim.log.levels.ERROR)
         return
     end
     
@@ -63,7 +63,7 @@ function M.validate_practice()
     -- Read template content
     local template_content = vim.fn.readfile(template_file)
     if not template_content then
-        vim.notify("Failed to read template file", vim.log.levels.ERROR)
+        vim.notify("Failed to read template", vim.log.levels.ERROR)
         return
     end
     

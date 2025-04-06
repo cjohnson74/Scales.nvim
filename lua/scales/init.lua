@@ -61,7 +61,7 @@ function M.setup(opts)
     
     -- Configure templates directory first
     if not configure_templates_dir() then
-        vim.notify("Failed to configure templates directory", vim.log.levels.ERROR)
+        vim.notify("Failed to configure templates", vim.log.levels.ERROR)
         return
     end
     
@@ -118,6 +118,12 @@ function M.setup(opts)
     patterns.patterns = patterns.load_templates()
     M.config.patterns = vim.tbl_keys(patterns.patterns)
     stats.load_stats()
+    
+    -- Verify stats initialization
+    if not stats.practice_log then
+        vim.notify("Failed to initialize stats", vim.log.levels.ERROR)
+        return
+    end
     
     -- Register commands
     vim.api.nvim_create_user_command('ScalesGenerate', function(args)

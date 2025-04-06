@@ -57,7 +57,6 @@ function M.pause_timing(pattern_name)
     if not stats.is_paused then
         stats.paused_time = os.time()
         stats.is_paused = true
-        vim.notify(string.format("Paused timing for %s at %d", pattern_name, stats.paused_time), vim.log.levels.INFO)
     end
 end
 
@@ -73,7 +72,6 @@ function M.resume_timing(pattern_name)
         stats.start_time = stats.start_time + pause_duration
         stats.paused_time = 0
         stats.is_paused = false
-        vim.notify(string.format("Resumed timing for %s after %d seconds", pattern_name, pause_duration), vim.log.levels.INFO)
     end
 end
 
@@ -111,11 +109,9 @@ function M.end_timing(file_path)
         stats.start_time = stats.start_time + pause_duration
         stats.paused_time = 0
         stats.is_paused = false
-        vim.notify(string.format("Ending timing for %s after %d seconds of pause", pattern_name, pause_duration), vim.log.levels.INFO)
     end
     
     local time_taken = end_time - stats.start_time
-    vim.notify(string.format("Total time taken for %s: %d seconds", pattern_name, time_taken), vim.log.levels.INFO)
     
     -- Update statistics
     stats.last_time = time_taken
