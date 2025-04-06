@@ -89,8 +89,21 @@ function M.validate_practice()
         return line
     end
 
+    -- Helper function to normalize whitespace
+    local function normalize_whitespace(line)
+        -- Preserve leading whitespace (indentation)
+        local leading_ws = line:match("^(%s*)")
+        -- Remove trailing whitespace
+        local content = line:gsub("%s*$", "")
+        -- Normalize internal whitespace (multiple spaces to single space)
+        content = content:gsub("%s+", " ")
+        -- Combine preserved indentation with normalized content
+        return leading_ws .. content
+    end
+
     for _, line in ipairs(template_content) do
         line = strip_comments(line)
+        line = normalize_whitespace(line)
         if not line:match("^%s*$") then
             table.insert(template_lines, line)
         end
@@ -98,6 +111,7 @@ function M.validate_practice()
 
     for _, line in ipairs(practice_content) do
         line = strip_comments(line)
+        line = normalize_whitespace(line)
         if not line:match("^%s*$") then
             table.insert(practice_lines, line)
         end
