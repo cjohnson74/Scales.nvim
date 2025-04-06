@@ -14,6 +14,7 @@ M.practice_log = {
 local last_activity_time = os.time()
 M.auto_pause_timer = nil  -- Make timer accessible
 local AUTO_PAUSE_TIMEOUT = 30  -- 30 seconds of inactivity
+local last_debug_time = 0  -- Track last debug message time
 
 -- Ensure stats directory exists
 local function ensure_stats_dir()
@@ -277,7 +278,6 @@ end
 -- Update last activity time
 function M.update_activity_time()
     last_activity_time = os.time()
-    vim.notify("Activity detected, resetting inactivity timer", vim.log.levels.INFO)
 end
 
 -- Check if timing is paused for current pattern
@@ -315,17 +315,19 @@ function M.start_auto_pause_timer()
         M.auto_pause_timer = nil
     end
     
-    vim.notify("Starting auto-pause timer", vim.log.levels.INFO)
-    
     -- Create and start new timer
     M.auto_pause_timer = vim.loop.new_timer()
     M.auto_pause_timer:start(1000, 1000, function()  -- Check every second
         local current_time = os.time()
         local inactive_time = current_time - last_activity_time
         
-        -- Debug: Show current inactivity time
-        if inactive_time % 5 == 0 then  -- Log every 5 seconds
-            vim.notify(string.format("Inactive for %d seconds", inactive_time), vim.log.levels.INFO)
+        -- Only show debug message every 5 seconds
+        if current_time - last_debug_time >= 5 then
+            last_debug_time = current_time
+            -- Use vim.schedule to safely update UI
+            vim.schedule(function()
+                vim.notify(string.format("Inactive for %d seconds", inactive_time), vim.log.levels.INFO)
+            end)
         end
         
         if inactive_time >= AUTO_PAUSE_TIMEOUT then
@@ -340,17 +342,24 @@ function M.start_auto_pause_timer()
                     local stats = M.practice_log.timing_stats[pattern_name]
                     if stats and not stats.is_paused then
                         M.pause_timing(pattern_name)
-                        vim.notify(string.format("Auto-paused timing for %s after %d seconds of inactivity", 
-                            pattern_name, 
-                            inactive_time), 
-                            vim.log.levels.INFO)
-                        
-                        -- Update statusline
-                        vim.api.nvim_exec_autocmds('User', { pattern = 'ScalesTimingStatusChanged' })
+                        -- Use vim.schedule to safely update UI
+                        vim.schedule(function()
+                            vim.notify(string.format("Auto-paused timing for %s after %d seconds of inactivity", 
+                                pattern_name, 
+                                inactive_time), 
+                                vim.log.levels.INFO)
+                            -- Update statusline
+                            vim.api.nvim_exec_autocmds('User', { pattern = 'ScalesTimingStatusChanged' })
+                        end)
                     end
                 end
             end
         end
+    end)
+    
+    -- Use vim.schedule to safely show initial message
+    vim.schedule(function()
+        vim.notify("Starting auto-pause timer", vim.log.levels.INFO)
     end)
 end
 
@@ -360,7 +369,10 @@ function M.stop_auto_pause_timer()
         M.auto_pause_timer:stop()
         M.auto_pause_timer:close()
         M.auto_pause_timer = nil
-        vim.notify("Stopped auto-pause timer", vim.log.levels.INFO)
+        -- Use vim.schedule to safely show message
+        vim.schedule(function()
+            vim.notify("Stopped auto-pause timer", vim.log.levels.INFO)
+        end)
     end
 end
 
