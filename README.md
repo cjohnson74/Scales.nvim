@@ -2,7 +2,7 @@
 
 > 🎵 *"You want to be like this in your next interview? Start with the basics."*
 
-[![Eruption - Eddie Van Halen](https://img.youtube.com/vi/L9r-NxuYszg/0.jpg)](https://www.youtube.com/watch?v=L9r-NxuYszg&t=512)
+[![Eruption - Eddie Van Halen](https://img.youtube.com/vi/L9r-NxuYszg/0.jpg)](https://www.youtube.com/watch?v=L9r-NxuYszg&t=152)
 
 Practice coding patterns like a musician practices scales. Just as guitarists master scales to build muscle memory and improvisation skills, this Neovim plugin helps you master common coding patterns through deliberate practice.
 
@@ -68,6 +68,63 @@ Most developers struggle with technical interviews because they're missing a cru
 | Prefix Sum | LRU Cache |
 
 *Each fundamental pattern (scale) builds the foundation for solving more complex problems (solos). Master the scales first, and the solos will become much easier to play!*
+
+## 🎸 Understanding Scales: From Music to Code
+
+### Musical Scales: The Building Blocks of Music
+A musical scale is a sequence of notes that forms the foundation of melodies and solos. For example, the A minor pentatonic scale consists of just five notes: A, C, D, E, G. These simple notes become the building blocks for creating complex solos and songs.
+
+Take Eddie Van Halen's "Eruption" - while it sounds incredibly complex, it's built on these fundamental scales. The fast runs, the tapping, the hammer-ons - they all follow patterns derived from scales. When you practice scales, you're not just learning notes; you're building the muscle memory and understanding needed to create music.
+
+### Coding Templates: The Building Blocks of Algorithms
+Just like musical scales, coding templates are fundamental patterns that form the building blocks of more complex algorithms. Here are some examples from our templates:
+
+#### 1. Binary Search Template
+```python
+def binary_search(arr, target):
+    left = 0
+    right = len(arr) - 1
+    
+    while left <= right:
+        mid = (left + right) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    
+    return -1
+```
+
+#### 2. Two Pointers (Same Direction) Template
+```python
+def two_pointers_same_direction(arr):
+    slow = 0
+    for fast in range(len(arr)):
+        if condition(arr[fast]):
+            arr[slow] = arr[fast]
+            slow += 1
+    return slow
+```
+
+#### 3. Sliding Window (Fixed Size) Template
+```python
+def sliding_window_fixed(arr, k):
+    window_sum = sum(arr[:k])
+    max_sum = window_sum
+    
+    for i in range(k, len(arr)):
+        window_sum = window_sum - arr[i-k] + arr[i]
+        max_sum = max(max_sum, window_sum)
+    
+    return max_sum
+```
+
+Just as a guitarist practices scales to build the foundation for solos, these templates form the foundation for solving complex coding problems. When you master these patterns, you'll be able to:
+- Recognize when to apply each pattern
+- Implement them quickly and accurately
+- Combine them to solve more complex problems
 
 ## 🚀 Getting Started
 
