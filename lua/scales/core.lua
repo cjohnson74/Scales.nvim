@@ -126,7 +126,6 @@ end
 
 -- Reset current practice stats
 function M.reset_current_stats()
-    local stats = require('scales.stats')
     stats.reset_current_timing()
 end
 
