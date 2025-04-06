@@ -72,6 +72,9 @@ function M.resume_timing(pattern_name)
         stats.start_time = stats.start_time + pause_duration
         stats.paused_time = 0
         stats.is_paused = false
+        
+        -- Update statusline
+        vim.api.nvim_exec_autocmds('User', { pattern = 'ScalesTimingStatusChanged' })
     end
 end
 
@@ -276,14 +279,41 @@ function M.update_activity_time()
     last_activity_time = os.time()
 end
 
+-- Check if timing is paused for current pattern
+function M.is_timing_paused()
+    local current_file = vim.fn.expand('%:p')
+    if not current_file:match('practice%.py$') then
+        return false
+    end
+    
+    local pattern_dir = vim.fn.fnamemodify(current_file, ':h')
+    local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
+    
+    if not pattern_name or pattern_name == '' then
+        return false
+    end
+    
+    local stats = M.practice_log.timing_stats[pattern_name]
+    return stats and stats.is_paused or false
+end
+
+-- Get timing status for statusline
+function M.get_timing_status()
+    if M.is_timing_paused() then
+        return "⏸️ Paused"
+    end
+    return "▶️ Timing"
+end
+
 -- Start auto-pause timer
 function M.start_auto_pause_timer()
     if auto_pause_timer then
-        return
+        auto_pause_timer:stop()
+        auto_pause_timer:close()
     end
     
     auto_pause_timer = vim.loop.new_timer()
-    auto_pause_timer:start(60000, 60000, function()  -- Check every minute
+    auto_pause_timer:start(1000, 1000, function()  -- Check every second
         local current_time = os.time()
         local inactive_time = current_time - last_activity_time
         
@@ -303,6 +333,9 @@ function M.start_auto_pause_timer()
                             pattern_name, 
                             inactive_time), 
                             vim.log.levels.INFO)
+                        
+                        -- Update statusline
+                        vim.api.nvim_exec_autocmds('User', { pattern = 'ScalesTimingStatusChanged' })
                     end
                 end
             end

@@ -290,6 +290,25 @@ function M.setup(opts)
         end
     })
     
+    -- Add statusline integration
+    vim.api.nvim_create_autocmd('User', {
+        pattern = 'ScalesTimingStatusChanged',
+        callback = function()
+            vim.cmd('redrawstatus')
+        end
+    })
+    
+    -- Add statusline component
+    vim.api.nvim_create_autocmd('FileType', {
+        pattern = 'python',
+        callback = function()
+            local current_file = vim.fn.expand('%:p')
+            if current_file:match('practice%.py$') then
+                vim.opt.statusline = vim.opt.statusline .. '%=%{luaeval("require(\'scales.stats\').get_timing_status()")}'
+            end
+        end
+    })
+    
     -- Expose UI functions
     M.ui = ui
 end
