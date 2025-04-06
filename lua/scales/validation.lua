@@ -141,9 +141,6 @@ function M.validate_practice()
         
         -- Update stats
         local timing_stats = stats.end_timing(current_file)
-        if timing_stats then
-            vim.notify(string.format("Practice completed in %s", format_time(timing_stats.last_time)), vim.log.levels.INFO)
-        end
         
         ui.show_success_message(pattern_name, is_first_success)
     else

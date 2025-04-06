@@ -13,7 +13,7 @@ M.practice_log = {
 -- Track last activity time
 local last_activity_time = os.time()
 local auto_pause_timer = nil
-local AUTO_PAUSE_TIMEOUT = 300  -- 5 minutes of inactivity
+local AUTO_PAUSE_TIMEOUT = 30  -- 30 seconds of inactivity
 
 -- Ensure stats directory exists
 local function ensure_stats_dir()
@@ -299,9 +299,9 @@ function M.start_auto_pause_timer()
                     local stats = M.practice_log.timing_stats[pattern_name]
                     if stats and not stats.is_paused then
                         M.pause_timing(pattern_name)
-                        vim.notify(string.format("Auto-paused timing for %s after %d minutes of inactivity", 
+                        vim.notify(string.format("Auto-paused timing for %s after %d seconds of inactivity", 
                             pattern_name, 
-                            math.floor(inactive_time / 60)), 
+                            inactive_time), 
                             vim.log.levels.INFO)
                     end
                 end

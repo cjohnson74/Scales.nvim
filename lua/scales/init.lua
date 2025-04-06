@@ -244,7 +244,6 @@ function M.setup(opts)
             -- Only resume if we're actually in a practice file
             if pattern_name and pattern_name ~= '' then
                 stats.resume_timing(pattern_name)
-                vim.notify("Resumed timing for " .. pattern_name, vim.log.levels.INFO)
             end
         end
     })
@@ -264,7 +263,6 @@ function M.setup(opts)
             -- Only resume if we're actually in a practice file
             if pattern_name and pattern_name ~= '' then
                 stats.resume_timing(pattern_name)
-                vim.notify("Resumed timing for " .. pattern_name, vim.log.levels.INFO)
             end
         end
     })
