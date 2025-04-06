@@ -277,6 +277,7 @@ end
 -- Update last activity time
 function M.update_activity_time()
     last_activity_time = os.time()
+    vim.notify("Activity detected, resetting inactivity timer", vim.log.levels.INFO)
 end
 
 -- Check if timing is paused for current pattern
@@ -312,10 +313,17 @@ function M.start_auto_pause_timer()
         auto_pause_timer:close()
     end
     
+    vim.notify("Starting auto-pause timer", vim.log.levels.INFO)
+    
     auto_pause_timer = vim.loop.new_timer()
     auto_pause_timer:start(1000, 1000, function()  -- Check every second
         local current_time = os.time()
         local inactive_time = current_time - last_activity_time
+        
+        -- Debug: Show current inactivity time
+        if inactive_time % 5 == 0 then  -- Log every 5 seconds
+            vim.notify(string.format("Inactive for %d seconds", inactive_time), vim.log.levels.INFO)
+        end
         
         if inactive_time >= AUTO_PAUSE_TIMEOUT then
             -- Get current file and pattern
