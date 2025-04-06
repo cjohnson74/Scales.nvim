@@ -315,6 +315,10 @@ function M.start_auto_pause_timer()
         M.auto_pause_timer = nil
     end
     
+    -- Reset activity tracking
+    last_activity_time = os.time()
+    last_debug_time = os.time()
+    
     -- Create and start new timer
     M.auto_pause_timer = vim.loop.new_timer()
     M.auto_pause_timer:start(1000, 1000, function()  -- Check every second
@@ -356,11 +360,6 @@ function M.start_auto_pause_timer()
             end
         end
     end)
-    
-    -- Use vim.schedule to safely show initial message
-    vim.schedule(function()
-        vim.notify("Starting auto-pause timer", vim.log.levels.INFO)
-    end)
 end
 
 -- Stop auto-pause timer
@@ -369,10 +368,6 @@ function M.stop_auto_pause_timer()
         M.auto_pause_timer:stop()
         M.auto_pause_timer:close()
         M.auto_pause_timer = nil
-        -- Use vim.schedule to safely show message
-        vim.schedule(function()
-            vim.notify("Stopped auto-pause timer", vim.log.levels.INFO)
-        end)
     end
 end
 

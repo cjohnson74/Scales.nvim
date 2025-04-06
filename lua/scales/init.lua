@@ -209,31 +209,30 @@ function M.setup(opts)
     
     -- Set up autocommands for timing
     vim.api.nvim_create_autocmd('BufEnter', {
-        pattern = 'practice.py',
+        pattern = M.config.practice_dir .. '/*/practice.py',
         callback = function()
             local stats = require('scales.stats')
             stats.start_auto_pause_timer()
+            vim.notify("Entered practice file, starting timer", vim.log.levels.INFO)
         end
     })
     
     vim.api.nvim_create_autocmd('BufLeave', {
-        pattern = 'practice.py',
+        pattern = M.config.practice_dir .. '/*/practice.py',
         callback = function()
             local stats = require('scales.stats')
-            if stats.auto_pause_timer then
-                stats.auto_pause_timer:stop()
-                stats.auto_pause_timer:close()
-                stats.auto_pause_timer = nil
-            end
+            stats.stop_auto_pause_timer()
+            vim.notify("Left practice file, stopping timer", vim.log.levels.INFO)
         end
     })
     
     -- Set up autocommands for activity detection
     vim.api.nvim_create_autocmd({'CursorMoved', 'CursorMovedI', 'TextChanged', 'TextChangedI'}, {
-        pattern = 'practice.py',
+        pattern = M.config.practice_dir .. '/*/practice.py',
         callback = function()
             local stats = require('scales.stats')
             stats.update_activity_time()
+            vim.notify("Activity detected", vim.log.levels.INFO)
         end
     })
     
