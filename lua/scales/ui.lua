@@ -453,6 +453,7 @@ function M.show_commands()
         "  :ScalesNext               - Next practice",
         "  :ScalesReload             - Refresh templates",
         "  :ScalesSetup              - Re-run setup",
+        "  :ScalesResetStats         - Reset current stats",
         "",
         "Key Mappings:",
         "════════════════════════",

@@ -78,14 +78,27 @@ function M.validate_practice()
     local template_lines = {}
     local practice_lines = {}
     
+    -- Helper function to strip comments from a line
+    local function strip_comments(line)
+        -- Remove inline comments
+        line = line:gsub("%s*#.*$", "")
+        -- Remove line comments
+        if line:match("^%s*#") then
+            return ""
+        end
+        return line
+    end
+
     for _, line in ipairs(template_content) do
-        if not line:match("^%s*#") and not line:match("^%s*$") then
+        line = strip_comments(line)
+        if not line:match("^%s*$") then
             table.insert(template_lines, line)
         end
     end
-    
+
     for _, line in ipairs(practice_content) do
-        if not line:match("^%s*#") and not line:match("^%s*$") then
+        line = strip_comments(line)
+        if not line:match("^%s*$") then
             table.insert(practice_lines, line)
         end
     end

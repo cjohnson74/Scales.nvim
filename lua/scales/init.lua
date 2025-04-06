@@ -10,16 +10,6 @@ M.config = {
     float_border = 'rounded',
     float_width = 60,
     float_height = 20,
-    -- Key mappings
-    mappings = {
-        generate = '<leader>sg',
-        practice = '<leader>sp',
-        validate = '<leader>sv',
-        list = '<leader>sl',
-        stats = '<leader>ss',
-        peek = '<leader>sp',
-        next = '<leader>sn'
-    },
     -- Debug settings
     debug = false  -- Disable debug logging by default
 }
@@ -140,7 +130,7 @@ function M.setup(opts)
         desc = 'Generate a coding practice template'
     })
     
-    vim.api.nvim_create_user_command('ScalesPractice', function()
+    vim.api.nvim_create_user_command('ScalesOpen', function()
         core.open_current_practice()
     end, {
         desc = 'Open most recent practice file'
@@ -176,34 +166,40 @@ function M.setup(opts)
         desc = 'Generate next practice session'
     })
     
-    -- Set up keymaps
-    vim.keymap.set('n', M.config.mappings.generate, function()
-        core.generate_practice()
-    end, { desc = 'Scales: Generate Practice' })
+    vim.api.nvim_create_user_command('ScalesResetStats', function()
+        core.reset_current_stats()
+    end, {
+        desc = 'Reset statistics for current practice'
+    })
+
+    vim.api.nvim_create_user_command('ScalesReload', function()
+        -- Clear cached modules
+        package.loaded['scales.core'] = nil
+        package.loaded['scales.patterns'] = nil
+        package.loaded['scales.stats'] = nil
+        package.loaded['scales.validation'] = nil
+        package.loaded['scales.ui'] = nil
+        
+        -- Reset templates loaded flag
+        local patterns = require('scales.patterns')
+        patterns._templates_loaded = false
+        
+        -- Re-run setup
+        M.setup(M.config)
+        vim.notify("Scales plugin reloaded", vim.log.levels.INFO)
+    end, {
+        desc = 'Reload Scales plugin'
+    })
     
-    vim.keymap.set('n', M.config.mappings.practice, function()
-        core.open_current_practice()
-    end, { desc = 'Scales: Open Practice' })
-    
-    vim.keymap.set('n', M.config.mappings.validate, function()
-        core.validate_practice()
-    end, { desc = 'Scales: Validate Practice' })
-    
-    vim.keymap.set('n', M.config.mappings.list, function()
-        core.list_patterns()
-    end, { desc = 'Scales: List Patterns' })
-    
-    vim.keymap.set('n', M.config.mappings.stats, function()
-        core.show_progress()
-    end, { desc = 'Scales: Show Stats' })
-    
-    vim.keymap.set('n', M.config.mappings.peek, function()
-        core.peek_template()
-    end, { desc = 'Scales: Peek Template' })
-    
-    vim.keymap.set('n', M.config.mappings.next, function()
-        core.generate_practice()
-    end, { desc = 'Scales: Next Practice' })
+    -- Set up key mappings
+    vim.keymap.set('n', '<leader>sg', ':ScalesGenerate<CR>', { silent = true, desc = 'Scales: Generate Practice' })
+    vim.keymap.set('n', '<leader>so', ':ScalesOpen<CR>', { silent = true, desc = 'Scales: Open Practice' })
+    vim.keymap.set('n', '<leader>sv', ':ScalesValidate<CR>', { silent = true, desc = 'Scales: Validate Practice' })
+    vim.keymap.set('n', '<leader>sl', ':ScalesList<CR>', { silent = true, desc = 'Scales: List Patterns' })
+    vim.keymap.set('n', '<leader>ss', ':ScalesStats<CR>', { silent = true, desc = 'Scales: Show Stats' })
+    vim.keymap.set('n', '<leader>sn', ':ScalesNext<CR>', { silent = true, desc = 'Scales: Next Practice' })
+    vim.keymap.set('n', '<leader>sp', ':ScalesPeek<CR>', { silent = true, desc = 'Scales: Peek Template' })
+    vim.keymap.set('n', '<leader>sr', ':ScalesResetStats<CR>', { silent = true, desc = 'Scales: Reset Stats' })
     
     -- Add cleanup on VimLeave
     vim.api.nvim_create_autocmd('VimLeave', {
@@ -264,6 +260,29 @@ function M.setup(opts)
                 stats.resume_timing(pattern_name)
                 vim.notify("Resumed timing for " .. pattern_name, vim.log.levels.INFO)
             end
+        end
+    })
+    
+    -- Add autocommands for activity tracking
+    vim.api.nvim_create_autocmd({'CursorMoved', 'CursorMovedI', 'TextChanged', 'TextChangedI'}, {
+        callback = function()
+            require('scales.stats').update_activity_time()
+        end
+    })
+
+    -- Start auto-pause timer when entering a practice file
+    vim.api.nvim_create_autocmd('BufEnter', {
+        pattern = M.config.practice_dir .. '/*/practice.py',
+        callback = function()
+            require('scales.stats').start_auto_pause_timer()
+        end
+    })
+
+    -- Stop auto-pause timer when leaving a practice file
+    vim.api.nvim_create_autocmd('BufLeave', {
+        pattern = M.config.practice_dir .. '/*/practice.py',
+        callback = function()
+            require('scales.stats').stop_auto_pause_timer()
         end
     })
     

@@ -10,6 +10,11 @@ M.practice_log = {
     attempt_stats = {}  -- Track attempts per file
 }
 
+-- Track last activity time
+local last_activity_time = os.time()
+local auto_pause_timer = nil
+local AUTO_PAUSE_TIMEOUT = 300  -- 5 minutes of inactivity
+
 -- Ensure stats directory exists
 local function ensure_stats_dir()
     if not M.config or not M.config.practice_dir then
@@ -267,6 +272,87 @@ function M.get_achievement_level(practice_count, first_attempt_successes)
         return "Intermediate", "🌱"
     else
         return "Beginner", "🌱"
+    end
+end
+
+-- Update last activity time
+function M.update_activity_time()
+    last_activity_time = os.time()
+end
+
+-- Start auto-pause timer
+function M.start_auto_pause_timer()
+    if auto_pause_timer then
+        return
+    end
+    
+    auto_pause_timer = vim.loop.new_timer()
+    auto_pause_timer:start(60000, 60000, function()  -- Check every minute
+        local current_time = os.time()
+        local inactive_time = current_time - last_activity_time
+        
+        if inactive_time >= AUTO_PAUSE_TIMEOUT then
+            -- Get current file and pattern
+            local current_file = vim.fn.expand('%:p')
+            if current_file:match('practice%.py$') then
+                local pattern_dir = vim.fn.fnamemodify(current_file, ':h')
+                local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
+                
+                if pattern_name and pattern_name ~= '' then
+                    -- Only pause if not already paused
+                    local stats = M.practice_log.timing_stats[pattern_name]
+                    if stats and not stats.is_paused then
+                        M.pause_timing(pattern_name)
+                        vim.notify(string.format("Auto-paused timing for %s after %d minutes of inactivity", 
+                            pattern_name, 
+                            math.floor(inactive_time / 60)), 
+                            vim.log.levels.INFO)
+                    end
+                end
+            end
+        end
+    end)
+end
+
+-- Stop auto-pause timer
+function M.stop_auto_pause_timer()
+    if auto_pause_timer then
+        auto_pause_timer:stop()
+        auto_pause_timer:close()
+        auto_pause_timer = nil
+    end
+end
+
+-- Reset timing for current practice session
+function M.reset_current_timing()
+    local current_file = vim.fn.expand('%:p')
+    if not current_file:match('practice%.py$') then
+        vim.notify("Not in a practice file", vim.log.levels.ERROR)
+        return
+    end
+    
+    local pattern_dir = vim.fn.fnamemodify(current_file, ':h')
+    local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
+    
+    if not pattern_name or pattern_name == '' then
+        vim.notify("Could not determine pattern name", vim.log.levels.ERROR)
+        return
+    end
+    
+    -- Reset timing stats for this pattern
+    if M.practice_log.timing_stats[pattern_name] then
+        M.practice_log.timing_stats[pattern_name] = {
+            start_time = os.time(),
+            last_time = 0,
+            best_time = 0,
+            average_time = 0,
+            total_practices = 0,
+            first_attempt_successes = 0,
+            paused_time = 0,
+            is_paused = false
+        }
+        M.save_stats()
+        vim.notify("Reset timing for " .. pattern_name, vim.log.levels.INFO)
     end
 end
 
