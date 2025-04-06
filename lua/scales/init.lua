@@ -207,85 +207,6 @@ function M.setup(opts)
     vim.keymap.set('n', '<leader>sn', '<cmd>ScalesNext<cr>', { desc = 'Next practice' })
     vim.keymap.set('n', '<leader>sr', '<cmd>ScalesResetStats<cr>', { desc = 'Reset stats' })
     
-    -- Set up autocommands for timing
-    vim.api.nvim_create_autocmd('BufEnter', {
-        pattern = M.config.practice_dir .. '/*/practice.py',
-        callback = function()
-            local current_file = vim.fn.expand('%:p')
-            vim.notify("BufEnter detected for practice file: " .. current_file, vim.log.levels.INFO)
-            
-            local stats = require('scales.stats')
-            stats.start_auto_pause_timer()
-            vim.notify("Timer started from BufEnter", vim.log.levels.INFO)
-        end
-    })
-    
-    vim.api.nvim_create_autocmd('BufLeave', {
-        pattern = M.config.practice_dir .. '/*/practice.py',
-        callback = function()
-            local current_file = vim.fn.expand('%:p')
-            vim.notify("BufLeave detected for practice file: " .. current_file, vim.log.levels.INFO)
-            
-            local stats = require('scales.stats')
-            stats.stop_auto_pause_timer()
-            vim.notify("Timer stopped from BufLeave", vim.log.levels.INFO)
-        end
-    })
-    
-    -- Set up autocommands for activity detection
-    vim.api.nvim_create_autocmd('CursorMoved', {
-        pattern = M.config.practice_dir .. '/*/practice.py',
-        callback = function()
-            local current_file = vim.fn.expand('%:p')
-            vim.notify("CursorMoved detected in practice file: " .. current_file, vim.log.levels.INFO)
-            require('scales.stats').update_activity_time()
-        end
-    })
-    
-    vim.api.nvim_create_autocmd('CursorMovedI', {
-        pattern = M.config.practice_dir .. '/*/practice.py',
-        callback = function()
-            local current_file = vim.fn.expand('%:p')
-            vim.notify("CursorMovedI detected in practice file: " .. current_file, vim.log.levels.INFO)
-            require('scales.stats').update_activity_time()
-        end
-    })
-    
-    vim.api.nvim_create_autocmd('TextChanged', {
-        pattern = M.config.practice_dir .. '/*/practice.py',
-        callback = function()
-            local current_file = vim.fn.expand('%:p')
-            vim.notify("TextChanged detected in practice file: " .. current_file, vim.log.levels.INFO)
-            require('scales.stats').update_activity_time()
-        end
-    })
-    
-    vim.api.nvim_create_autocmd('TextChangedI', {
-        pattern = M.config.practice_dir .. '/*/practice.py',
-        callback = function()
-            local current_file = vim.fn.expand('%:p')
-            vim.notify("TextChangedI detected in practice file: " .. current_file, vim.log.levels.INFO)
-            require('scales.stats').update_activity_time()
-        end
-    })
-    
-    -- Set up autocommands for statusline
-    vim.api.nvim_create_autocmd('User', {
-        pattern = 'ScalesTimingStatusChanged',
-        callback = function()
-            vim.cmd('redrawstatus')
-        end
-    })
-    
-    vim.api.nvim_create_autocmd('FileType', {
-        pattern = 'python',
-        callback = function()
-            if vim.fn.expand('%:t') == 'practice.py' then
-                vim.opt.statusline:append('%{luaeval("require(\'scales.stats\').get_timing_status()")}')
-            end
-        end
-    })
-    
     -- Add cleanup on VimLeave
     vim.api.nvim_create_autocmd('VimLeave', {
         callback = function()
@@ -297,36 +218,15 @@ function M.setup(opts)
             if current_file:match('practice%.py$') then
                 local pattern_dir = vim.fn.fnamemodify(current_file, ':h')
                 local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
-                local stats = require('scales.stats')
                 
                 if pattern_name and pattern_name ~= '' then
                     stats.pause_timing(pattern_name)
-                    vim.notify("Paused timing for " .. pattern_name .. " before quitting", vim.log.levels.INFO)
                 end
             end
         end
     })
     
     -- Add autocommands for timing
-    vim.api.nvim_create_autocmd('BufLeave', {
-        pattern = M.config.practice_dir .. '/*/practice.py',
-        callback = function()
-            local current_file = vim.fn.expand('%:p')
-            if not current_file:match('practice%.py$') then
-                return
-            end
-            
-            local pattern_dir = vim.fn.fnamemodify(current_file, ':h')
-            local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
-            local stats = require('scales.stats')
-            
-            -- Only resume if we're actually in a practice file
-            if pattern_name and pattern_name ~= '' then
-                stats.resume_timing(pattern_name)
-            end
-        end
-    })
-    
     vim.api.nvim_create_autocmd('BufEnter', {
         pattern = M.config.practice_dir .. '/*/practice.py',
         callback = function()
@@ -337,28 +237,27 @@ function M.setup(opts)
             
             local pattern_dir = vim.fn.fnamemodify(current_file, ':h')
             local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
-            local stats = require('scales.stats')
             
-            -- Only resume if we're actually in a practice file
             if pattern_name and pattern_name ~= '' then
-                stats.resume_timing(pattern_name)
+                stats.start_timing(pattern_name)
             end
         end
     })
     
-    -- Start auto-pause timer when entering a practice file
-    vim.api.nvim_create_autocmd('BufEnter', {
-        pattern = M.config.practice_dir .. '/*/practice.py',
-        callback = function()
-            require('scales.stats').start_auto_pause_timer()
-        end
-    })
-
-    -- Stop auto-pause timer when leaving a practice file
     vim.api.nvim_create_autocmd('BufLeave', {
         pattern = M.config.practice_dir .. '/*/practice.py',
         callback = function()
-            require('scales.stats').stop_auto_pause_timer()
+            local current_file = vim.fn.expand('%:p')
+            if not current_file:match('practice%.py$') then
+                return
+            end
+            
+            local pattern_dir = vim.fn.fnamemodify(current_file, ':h')
+            local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
+            
+            if pattern_name and pattern_name ~= '' then
+                stats.pause_timing(pattern_name)
+            end
         end
     })
     
