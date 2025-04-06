@@ -564,50 +564,50 @@ These key mappings are available in normal mode:
 
 ### Pattern Difficulty Levels
 
-- 🎸 **Beginner Patterns** (1-2 stars)
-  - [1] Sliding Window Fixed Size
-    - Practice sliding window fixed size technique
+- 🎸 **Beginner Patterns** (2 stars)
+  - [1] Binary Search
+    - Practice binary search technique
   - [2] Two Pointers Same Directions
     - Practice two pointers same directions technique
   - [2] Two Pointers Opposite Directions
     - Practice two pointers opposite directions technique
-  - [3] Binary Search
-    - Practice binary search technique
 
 - 🎵 **Intermediate Patterns** (3-4 stars)
+  - [3] Sliding Window Fixed Size
+    - Practice sliding window fixed size technique
+  - [3] Sliding Window Flexible Longest
+    - Practice sliding window flexible longest technique
+  - [3] Sliding Window Flexible Shortest
+    - Practice sliding window flexible shortest technique
   - [4] DFS on Tree
     - Practice depth-first search on tree technique
-  - [5] BFS on Tree
+  - [4] BFS on Tree
     - Practice breadth-first search on tree technique
-  - [6] Sliding Window Flexible Longest
-    - Practice sliding window flexible longest technique
-  - [7] Sliding Window Flexible Shortest
-    - Practice sliding window flexible shortest technique
-  - [8] Prefix Sum
-    - Practice prefix sum technique
-  - [9] DFS on Graph
+  - [4] DFS on Graph
     - Practice depth-first search on graph technique
-  - [10] BFS on Graph
+  - [4] BFS on Graph
     - Practice breadth-first search on graph technique
-  - [11] BFS on Matrix
+  - [4] BFS on Matrix
     - Practice breadth-first search on matrix technique
+  - [4] Prefix Sum
+    - Practice prefix sum technique
 
 - 🎼 **Advanced Patterns** (5 stars)
-  - [12] Backtracking Basic
+  - [5] Backtracking Basic
     - Practice basic backtracking technique
-  - [13] Backtracking Aggregation
+  - [5] Backtracking Aggregation
     - Practice backtracking with aggregation
-  - [14] Topological Sort
+  - [5] Topological Sort
     - Practice topological sort technique
-  - [15] Union Find
+  - [5] Union Find
     - Practice union find technique
-  - [16] Trie
+  - [5] Trie
     - Practice trie technique
-  - [17] Monotonic Stack
+  - [5] Monotonic Stack
     - Practice monotonic stack technique
-  - [18] DP Top Down
+  - [5] DP Top Down
     - Practice dynamic programming top-down technique
-  - [19] DP Bottom Up
+  - [5] DP Bottom Up
     - Practice dynamic programming bottom-up technique
 
 ## 🏆 Achievements
