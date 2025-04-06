@@ -62,10 +62,12 @@ Most developers struggle with technical interviews because they're missing a cru
 
 | Scales (Fundamentals) | Solos (Complex Problems) |
 |----------------------|-------------------------|
-| Binary Search | Dynamic Programming |
-| Two Pointers | Graph Algorithms |
-| Sliding Window | Backtracking |
-| Prefix Sum | Advanced Data Structures |
+| Binary Search | Longest Palindromic Substring |
+| Two Pointers | Course Schedule |
+| Sliding Window | N-Queens |
+| Prefix Sum | LRU Cache |
+
+*Each fundamental pattern (scale) builds the foundation for solving more complex problems (solos). Master the scales first, and the solos will become much easier to play!*
 
 ## 🚀 Getting Started
 
