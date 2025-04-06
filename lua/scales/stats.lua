@@ -279,6 +279,23 @@ end
 function M.update_activity_time()
     local old_time = last_activity_time
     last_activity_time = os.time()
+    
+    -- If timing was paused due to inactivity, resume it
+    local current_file = vim.fn.expand('%:p')
+    if current_file:match('practice%.py$') then
+        local pattern_dir = vim.fn.fnamemodify(current_file, ':h')
+        local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
+        
+        if pattern_name and pattern_name ~= '' then
+            local stats = M.practice_log.timing_stats[pattern_name]
+            if stats and stats.is_paused then
+                M.resume_timing(pattern_name)
+                -- Restart the timer
+                M.start_auto_pause_timer()
+            end
+        end
+    end
+    
     vim.schedule(function()
         vim.notify(string.format("Activity detected - Old time: %d, New time: %d, Time since last activity: %d", 
             old_time, 
@@ -354,6 +371,7 @@ function M.start_auto_pause_timer()
             end)
         end
         
+        -- Check if we've been inactive for too long
         if inactive_time >= AUTO_PAUSE_TIMEOUT then
             -- Get current file and pattern
             local current_file = vim.fn.expand('%:p')
@@ -365,15 +383,21 @@ function M.start_auto_pause_timer()
                     -- Only pause if not already paused
                     local stats = M.practice_log.timing_stats[pattern_name]
                     if stats and not stats.is_paused then
+                        -- Pause timing
                         M.pause_timing(pattern_name)
+                        
                         -- Use vim.schedule to safely update UI
                         vim.schedule(function()
                             vim.notify(string.format("Auto-paused timing for %s after %d seconds of inactivity", 
                                 pattern_name, 
                                 inactive_time), 
                                 vim.log.levels.INFO)
+                            
                             -- Update statusline
                             vim.api.nvim_exec_autocmds('User', { pattern = 'ScalesTimingStatusChanged' })
+                            
+                            -- Stop the timer since we're paused
+                            M.stop_auto_pause_timer()
                         end)
                     end
                 end
