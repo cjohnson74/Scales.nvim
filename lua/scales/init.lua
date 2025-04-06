@@ -211,28 +211,61 @@ function M.setup(opts)
     vim.api.nvim_create_autocmd('BufEnter', {
         pattern = M.config.practice_dir .. '/*/practice.py',
         callback = function()
+            local current_file = vim.fn.expand('%:p')
+            vim.notify("BufEnter detected for practice file: " .. current_file, vim.log.levels.INFO)
+            
             local stats = require('scales.stats')
             stats.start_auto_pause_timer()
-            vim.notify("Entered practice file, starting timer", vim.log.levels.INFO)
+            vim.notify("Timer started from BufEnter", vim.log.levels.INFO)
         end
     })
     
     vim.api.nvim_create_autocmd('BufLeave', {
         pattern = M.config.practice_dir .. '/*/practice.py',
         callback = function()
+            local current_file = vim.fn.expand('%:p')
+            vim.notify("BufLeave detected for practice file: " .. current_file, vim.log.levels.INFO)
+            
             local stats = require('scales.stats')
             stats.stop_auto_pause_timer()
-            vim.notify("Left practice file, stopping timer", vim.log.levels.INFO)
+            vim.notify("Timer stopped from BufLeave", vim.log.levels.INFO)
         end
     })
     
     -- Set up autocommands for activity detection
-    vim.api.nvim_create_autocmd({'CursorMoved', 'CursorMovedI', 'TextChanged', 'TextChangedI'}, {
+    vim.api.nvim_create_autocmd('CursorMoved', {
         pattern = M.config.practice_dir .. '/*/practice.py',
         callback = function()
-            local stats = require('scales.stats')
-            stats.update_activity_time()
-            vim.notify("Activity detected", vim.log.levels.INFO)
+            local current_file = vim.fn.expand('%:p')
+            vim.notify("CursorMoved detected in practice file: " .. current_file, vim.log.levels.INFO)
+            require('scales.stats').update_activity_time()
+        end
+    })
+    
+    vim.api.nvim_create_autocmd('CursorMovedI', {
+        pattern = M.config.practice_dir .. '/*/practice.py',
+        callback = function()
+            local current_file = vim.fn.expand('%:p')
+            vim.notify("CursorMovedI detected in practice file: " .. current_file, vim.log.levels.INFO)
+            require('scales.stats').update_activity_time()
+        end
+    })
+    
+    vim.api.nvim_create_autocmd('TextChanged', {
+        pattern = M.config.practice_dir .. '/*/practice.py',
+        callback = function()
+            local current_file = vim.fn.expand('%:p')
+            vim.notify("TextChanged detected in practice file: " .. current_file, vim.log.levels.INFO)
+            require('scales.stats').update_activity_time()
+        end
+    })
+    
+    vim.api.nvim_create_autocmd('TextChangedI', {
+        pattern = M.config.practice_dir .. '/*/practice.py',
+        callback = function()
+            local current_file = vim.fn.expand('%:p')
+            vim.notify("TextChangedI detected in practice file: " .. current_file, vim.log.levels.INFO)
+            require('scales.stats').update_activity_time()
         end
     })
     

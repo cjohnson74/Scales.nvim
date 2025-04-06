@@ -280,9 +280,10 @@ function M.update_activity_time()
     local old_time = last_activity_time
     last_activity_time = os.time()
     vim.schedule(function()
-        vim.notify(string.format("Activity detected - Old time: %d, New time: %d", 
+        vim.notify(string.format("Activity detected - Old time: %d, New time: %d, Time since last activity: %d", 
             old_time, 
-            last_activity_time), 
+            last_activity_time,
+            last_activity_time - old_time), 
             vim.log.levels.INFO)
     end)
 end
@@ -336,10 +337,11 @@ function M.start_auto_pause_timer()
         
         -- Debug: Always show current state
         vim.schedule(function()
-            vim.notify(string.format("Timer running - Current time: %d, Last activity: %d, Inactive for: %d seconds", 
+            vim.notify(string.format("Timer running - Current time: %d, Last activity: %d, Inactive for: %d seconds, Auto-pause timeout: %d", 
                 current_time, 
                 last_activity_time, 
-                inactive_time), 
+                inactive_time,
+                AUTO_PAUSE_TIMEOUT), 
                 vim.log.levels.INFO)
         end)
         
