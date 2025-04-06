@@ -198,14 +198,61 @@ function M.setup(opts)
     })
     
     -- Set up key mappings
-    vim.keymap.set('n', '<leader>sg', ':ScalesGenerate<CR>', { silent = true, desc = 'Scales: Generate Practice' })
-    vim.keymap.set('n', '<leader>so', ':ScalesOpen<CR>', { silent = true, desc = 'Scales: Open Practice' })
-    vim.keymap.set('n', '<leader>sv', ':ScalesValidate<CR>', { silent = true, desc = 'Scales: Validate Practice' })
-    vim.keymap.set('n', '<leader>sl', ':ScalesList<CR>', { silent = true, desc = 'Scales: List Patterns' })
-    vim.keymap.set('n', '<leader>ss', ':ScalesStats<CR>', { silent = true, desc = 'Scales: Show Stats' })
-    vim.keymap.set('n', '<leader>sn', ':ScalesNext<CR>', { silent = true, desc = 'Scales: Next Practice' })
-    vim.keymap.set('n', '<leader>sp', ':ScalesPeek<CR>', { silent = true, desc = 'Scales: Peek Template' })
-    vim.keymap.set('n', '<leader>sr', ':ScalesResetStats<CR>', { silent = true, desc = 'Scales: Reset Stats' })
+    vim.keymap.set('n', '<leader>sg', '<cmd>ScalesGenerate<cr>', { desc = 'Generate practice' })
+    vim.keymap.set('n', '<leader>so', '<cmd>ScalesOpen<cr>', { desc = 'Open practice' })
+    vim.keymap.set('n', '<leader>sv', '<cmd>ScalesValidate<cr>', { desc = 'Validate practice' })
+    vim.keymap.set('n', '<leader>sl', '<cmd>ScalesList<cr>', { desc = 'List patterns' })
+    vim.keymap.set('n', '<leader>ss', '<cmd>ScalesStats<cr>', { desc = 'Show stats' })
+    vim.keymap.set('n', '<leader>sp', '<cmd>ScalesPeek<cr>', { desc = 'Peek template' })
+    vim.keymap.set('n', '<leader>sn', '<cmd>ScalesNext<cr>', { desc = 'Next practice' })
+    vim.keymap.set('n', '<leader>sr', '<cmd>ScalesResetStats<cr>', { desc = 'Reset stats' })
+    
+    -- Set up autocommands for timing
+    vim.api.nvim_create_autocmd('BufEnter', {
+        pattern = 'practice.py',
+        callback = function()
+            local stats = require('scales.stats')
+            stats.start_auto_pause_timer()
+        end
+    })
+    
+    vim.api.nvim_create_autocmd('BufLeave', {
+        pattern = 'practice.py',
+        callback = function()
+            local stats = require('scales.stats')
+            if stats.auto_pause_timer then
+                stats.auto_pause_timer:stop()
+                stats.auto_pause_timer:close()
+                stats.auto_pause_timer = nil
+            end
+        end
+    })
+    
+    -- Set up autocommands for activity detection
+    vim.api.nvim_create_autocmd({'CursorMoved', 'CursorMovedI', 'TextChanged', 'TextChangedI'}, {
+        pattern = 'practice.py',
+        callback = function()
+            local stats = require('scales.stats')
+            stats.update_activity_time()
+        end
+    })
+    
+    -- Set up autocommands for statusline
+    vim.api.nvim_create_autocmd('User', {
+        pattern = 'ScalesTimingStatusChanged',
+        callback = function()
+            vim.cmd('redrawstatus')
+        end
+    })
+    
+    vim.api.nvim_create_autocmd('FileType', {
+        pattern = 'python',
+        callback = function()
+            if vim.fn.expand('%:t') == 'practice.py' then
+                vim.opt.statusline:append('%{luaeval("require(\'scales.stats\').get_timing_status()")}')
+            end
+        end
+    })
     
     -- Add cleanup on VimLeave
     vim.api.nvim_create_autocmd('VimLeave', {
@@ -267,13 +314,6 @@ function M.setup(opts)
         end
     })
     
-    -- Add autocommands for activity tracking
-    vim.api.nvim_create_autocmd({'CursorMoved', 'CursorMovedI', 'TextChanged', 'TextChangedI'}, {
-        callback = function()
-            require('scales.stats').update_activity_time()
-        end
-    })
-
     -- Start auto-pause timer when entering a practice file
     vim.api.nvim_create_autocmd('BufEnter', {
         pattern = M.config.practice_dir .. '/*/practice.py',
@@ -287,25 +327,6 @@ function M.setup(opts)
         pattern = M.config.practice_dir .. '/*/practice.py',
         callback = function()
             require('scales.stats').stop_auto_pause_timer()
-        end
-    })
-    
-    -- Add statusline integration
-    vim.api.nvim_create_autocmd('User', {
-        pattern = 'ScalesTimingStatusChanged',
-        callback = function()
-            vim.cmd('redrawstatus')
-        end
-    })
-    
-    -- Add statusline component
-    vim.api.nvim_create_autocmd('FileType', {
-        pattern = 'python',
-        callback = function()
-            local current_file = vim.fn.expand('%:p')
-            if current_file:match('practice%.py$') then
-                vim.opt.statusline = vim.opt.statusline .. '%=%{luaeval("require(\'scales.stats\').get_timing_status()")}'
-            end
         end
     })
     
