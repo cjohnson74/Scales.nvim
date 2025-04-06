@@ -12,7 +12,7 @@ M.practice_log = {
 
 -- Track last activity time
 local last_activity_time = os.time()
-local auto_pause_timer = nil
+M.auto_pause_timer = nil  -- Make timer accessible
 local AUTO_PAUSE_TIMEOUT = 30  -- 30 seconds of inactivity
 
 -- Ensure stats directory exists
@@ -308,15 +308,18 @@ end
 
 -- Start auto-pause timer
 function M.start_auto_pause_timer()
-    if auto_pause_timer then
-        auto_pause_timer:stop()
-        auto_pause_timer:close()
+    -- Stop any existing timer
+    if M.auto_pause_timer then
+        M.auto_pause_timer:stop()
+        M.auto_pause_timer:close()
+        M.auto_pause_timer = nil
     end
     
     vim.notify("Starting auto-pause timer", vim.log.levels.INFO)
     
-    auto_pause_timer = vim.loop.new_timer()
-    auto_pause_timer:start(1000, 1000, function()  -- Check every second
+    -- Create and start new timer
+    M.auto_pause_timer = vim.loop.new_timer()
+    M.auto_pause_timer:start(1000, 1000, function()  -- Check every second
         local current_time = os.time()
         local inactive_time = current_time - last_activity_time
         
@@ -353,10 +356,11 @@ end
 
 -- Stop auto-pause timer
 function M.stop_auto_pause_timer()
-    if auto_pause_timer then
-        auto_pause_timer:stop()
-        auto_pause_timer:close()
-        auto_pause_timer = nil
+    if M.auto_pause_timer then
+        M.auto_pause_timer:stop()
+        M.auto_pause_timer:close()
+        M.auto_pause_timer = nil
+        vim.notify("Stopped auto-pause timer", vim.log.levels.INFO)
     end
 end
 
