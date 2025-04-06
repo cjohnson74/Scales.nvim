@@ -10,13 +10,6 @@ M.practice_log = {
     attempt_stats = {}  -- Track attempts per file
 }
 
--- Track last activity time
-local last_activity_time = os.time()
-M.auto_pause_timer = nil  -- Make timer accessible
-local AUTO_PAUSE_TIMEOUT = 30  -- 30 seconds of inactivity
-local last_debug_time = 0  -- Track last debug message time
-local is_timer_running = false  -- Track if timer is running
-
 -- Ensure stats directory exists
 local function ensure_stats_dir()
     if not M.config or not M.config.practice_dir then
@@ -36,47 +29,11 @@ function M.start_timing(pattern_name)
             start_time = os.time(),
             last_time = 0,
             best_time = 0,
-            average_time = 0,
             total_practices = 0,
-            first_attempt_successes = 0,
-            paused_time = 0,
-            is_paused = false
+            first_attempt_successes = 0
         }
     else
         M.practice_log.timing_stats[pattern_name].start_time = os.time()
-        M.practice_log.timing_stats[pattern_name].paused_time = 0
-        M.practice_log.timing_stats[pattern_name].is_paused = false
-    end
-end
-
--- Pause timing for a practice session
-function M.pause_timing(pattern_name)
-    if not M.practice_log.timing_stats[pattern_name] then
-        return
-    end
-    
-    local stats = M.practice_log.timing_stats[pattern_name]
-    if not stats.is_paused then
-        stats.paused_time = os.time()
-        stats.is_paused = true
-    end
-end
-
--- Resume timing for a practice session
-function M.resume_timing(pattern_name)
-    if not M.practice_log.timing_stats[pattern_name] then
-        return
-    end
-    
-    local stats = M.practice_log.timing_stats[pattern_name]
-    if stats.is_paused then
-        local pause_duration = os.time() - stats.paused_time
-        stats.start_time = stats.start_time + pause_duration
-        stats.paused_time = 0
-        stats.is_paused = false
-        
-        -- Update statusline
-        vim.api.nvim_exec_autocmds('User', { pattern = 'ScalesTimingStatusChanged' })
     end
 end
 
@@ -101,24 +58,16 @@ function M.end_timing(file_path)
         return {
             last_time = 0,
             best_time = 0,
-            average_time = 0
+            improvement = 0
         }
     end
     
     local stats = M.practice_log.timing_stats[pattern_name]
     local end_time = os.time()
-    
-    -- If paused, add the pause duration to the start time
-    if stats.is_paused then
-        local pause_duration = end_time - stats.paused_time
-        stats.start_time = stats.start_time + pause_duration
-        stats.paused_time = 0
-        stats.is_paused = false
-    end
-    
     local time_taken = end_time - stats.start_time
     
     -- Update statistics
+    local old_best = stats.best_time
     stats.last_time = time_taken
     stats.total_practices = stats.total_practices + 1
     
@@ -127,15 +76,15 @@ function M.end_timing(file_path)
         stats.first_attempt_successes = stats.first_attempt_successes + 1
     end
     
+    -- Update best time if this is better
     if stats.best_time == 0 or time_taken < stats.best_time then
         stats.best_time = time_taken
     end
     
-    -- Update average time
-    if stats.total_practices == 1 then
-        stats.average_time = time_taken
-    else
-        stats.average_time = (stats.average_time * (stats.total_practices - 1) + time_taken) / stats.total_practices
+    -- Calculate improvement percentage
+    local improvement = 0
+    if stats.last_time > 0 and stats.best_time > 0 then
+        improvement = ((stats.last_time - stats.best_time) / stats.last_time) * 100
     end
     
     -- Update pattern practice count with attempt weighting
@@ -149,8 +98,7 @@ function M.end_timing(file_path)
     return {
         last_time = stats.last_time,
         best_time = stats.best_time,
-        average_time = stats.average_time,
-        first_attempt_successes = stats.first_attempt_successes
+        improvement = improvement
     }
 end
 
@@ -276,132 +224,6 @@ function M.get_achievement_level(practice_count, first_attempt_successes)
     end
 end
 
--- Update last activity time
-function M.update_activity_time()
-    local old_time = last_activity_time
-    last_activity_time = os.time()
-    
-    -- If timing was paused due to inactivity, resume it
-    local current_file = vim.fn.expand('%:p')
-    if current_file:match('practice%.py$') then
-        local pattern_dir = vim.fn.fnamemodify(current_file, ':h')
-        local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
-        
-        if pattern_name and pattern_name ~= '' then
-            local stats = M.practice_log.timing_stats[pattern_name]
-            if stats and stats.is_paused then
-                M.resume_timing(pattern_name)
-            end
-        end
-    end
-    
-    -- Only show debug message every 5 seconds
-    local current_time = os.time()
-    if current_time - last_debug_time >= 5 then
-        last_debug_time = current_time
-        vim.schedule(function()
-            vim.notify(string.format("Activity detected - Time since last activity: %d seconds", 
-                current_time - old_time), 
-                vim.log.levels.INFO)
-        end)
-    end
-end
-
--- Check if timing is paused for current pattern
-function M.is_timing_paused()
-    local current_file = vim.fn.expand('%:p')
-    if not current_file:match('practice%.py$') then
-        return false
-    end
-    
-    local pattern_dir = vim.fn.fnamemodify(current_file, ':h')
-    local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
-    
-    if not pattern_name or pattern_name == '' then
-        return false
-    end
-    
-    local stats = M.practice_log.timing_stats[pattern_name]
-    return stats and stats.is_paused or false
-end
-
--- Get timing status for statusline
-function M.get_timing_status()
-    if M.is_timing_paused() then
-        return "⏸️ Paused"
-    end
-    return "▶️ Timing"
-end
-
--- Start auto-pause timer
-function M.start_auto_pause_timer()
-    -- Only start if not already running
-    if is_timer_running then
-        return
-    end
-    
-    -- Reset activity tracking
-    last_activity_time = os.time()
-    last_debug_time = os.time()
-    is_timer_running = true
-    
-    vim.notify("Starting auto-pause timer", vim.log.levels.INFO)
-    
-    -- Create and start new timer
-    M.auto_pause_timer = vim.loop.new_timer()
-    M.auto_pause_timer:start(1000, 1000, function()  -- Check every second
-        local current_time = os.time()
-        local inactive_time = current_time - last_activity_time
-        
-        -- Only show debug message every 5 seconds
-        if current_time - last_debug_time >= 5 then
-            last_debug_time = current_time
-            vim.schedule(function()
-                vim.notify(string.format("Inactive for %d seconds", inactive_time), vim.log.levels.INFO)
-            end)
-        end
-        
-        -- Check if we've been inactive for too long
-        if inactive_time >= AUTO_PAUSE_TIMEOUT then
-            -- Get current file and pattern
-            local current_file = vim.fn.expand('%:p')
-            if current_file:match('practice%.py$') then
-                local pattern_dir = vim.fn.fnamemodify(current_file, ':h')
-                local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
-                
-                if pattern_name and pattern_name ~= '' then
-                    -- Only pause if not already paused
-                    local stats = M.practice_log.timing_stats[pattern_name]
-                    if stats and not stats.is_paused then
-                        -- Pause timing
-                        M.pause_timing(pattern_name)
-                        
-                        vim.schedule(function()
-                            vim.notify(string.format("Auto-paused timing for %s after %d seconds of inactivity", 
-                                pattern_name, 
-                                inactive_time), 
-                                vim.log.levels.INFO)
-                            
-                            -- Update statusline
-                            vim.api.nvim_exec_autocmds('User', { pattern = 'ScalesTimingStatusChanged' })
-                        end)
-                    end
-                end
-            end
-        end
-    end)
-end
-
--- Stop auto-pause timer
-function M.stop_auto_pause_timer()
-    if M.auto_pause_timer then
-        M.auto_pause_timer:stop()
-        M.auto_pause_timer:close()
-        M.auto_pause_timer = nil
-        is_timer_running = false
-    end
-end
-
 -- Reset timing for current practice session
 function M.reset_current_timing()
     local current_file = vim.fn.expand('%:p')
@@ -424,11 +246,8 @@ function M.reset_current_timing()
             start_time = os.time(),
             last_time = 0,
             best_time = 0,
-            average_time = 0,
             total_practices = 0,
-            first_attempt_successes = 0,
-            paused_time = 0,
-            is_paused = false
+            first_attempt_successes = 0
         }
         M.save_stats()
         vim.notify("Reset timing for " .. pattern_name, vim.log.levels.INFO)

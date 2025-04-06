@@ -38,6 +38,60 @@ function M.setup(opts)
         vim.notify("Failed to initialize stats", vim.log.levels.ERROR)
         return
     end
+    
+    -- Add cleanup on VimLeave
+    vim.api.nvim_create_autocmd('VimLeave', {
+        callback = function()
+            -- Cleanup UI
+            ui.cleanup()
+            
+            -- Pause timing for any active practice
+            local current_file = vim.fn.expand('%:p')
+            if current_file:match('practice%.py$') then
+                local pattern_dir = vim.fn.fnamemodify(current_file, ':h')
+                local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
+                
+                if pattern_name and pattern_name ~= '' then
+                    stats.pause_timing(pattern_name)
+                end
+            end
+        end
+    })
+    
+    -- Add autocommands for timing
+    vim.api.nvim_create_autocmd('BufEnter', {
+        pattern = opts.practice_dir .. '/*/practice.py',
+        callback = function()
+            local current_file = vim.fn.expand('%:p')
+            if not current_file:match('practice%.py$') then
+                return
+            end
+            
+            local pattern_dir = vim.fn.fnamemodify(current_file, ':h')
+            local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
+            
+            if pattern_name and pattern_name ~= '' then
+                stats.start_timing(pattern_name)
+            end
+        end
+    })
+    
+    vim.api.nvim_create_autocmd('BufLeave', {
+        pattern = opts.practice_dir .. '/*/practice.py',
+        callback = function()
+            local current_file = vim.fn.expand('%:p')
+            if not current_file:match('practice%.py$') then
+                return
+            end
+            
+            local pattern_dir = vim.fn.fnamemodify(current_file, ':h')
+            local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
+            
+            if pattern_name and pattern_name ~= '' then
+                stats.pause_timing(pattern_name)
+            end
+        end
+    })
 end
 
 -- Generate a practice session

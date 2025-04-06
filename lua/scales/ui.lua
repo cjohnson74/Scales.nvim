@@ -355,12 +355,16 @@ function M.show_progress()
             table.insert(progress_contents, string.format("  • Best Time: %s", format_time(pattern_stats.best_time)))
         end
         
-        if pattern_stats.average_time and pattern_stats.average_time > 0 then
-            table.insert(progress_contents, string.format("  • Average Time: %s", format_time(pattern_stats.average_time)))
-        end
-        
         if pattern_stats.last_time and pattern_stats.last_time > 0 then
-            table.insert(progress_contents, string.format("  • Last Time: %s", format_time(pattern_stats.last_time)))
+            local improvement = 0
+            if pattern_stats.last_time > 0 and pattern_stats.best_time > 0 then
+                improvement = ((pattern_stats.last_time - pattern_stats.best_time) / pattern_stats.last_time) * 100
+            end
+            local improvement_emoji = improvement > 0 and "📈" or "📉"
+            table.insert(progress_contents, string.format("  • Last Time: %s (%s %.1f%%)", 
+                format_time(pattern_stats.last_time),
+                improvement_emoji,
+                improvement))
         end
         
         table.insert(progress_contents, string.format("  • Level: %s", level))
@@ -410,8 +414,22 @@ function M.show_success_message(pattern_name, is_first_validation)
     local timing_stats = stats.practice_log.timing_stats[pattern_name]
     if timing_stats and timing_stats.last_time > 0 then
         table.insert(success_message, string.format("Time taken: %s", format_time(timing_stats.last_time)))
-        if timing_stats.best_time > 0 and timing_stats.best_time ~= timing_stats.last_time then
-            table.insert(success_message, string.format("Best time: %s", format_time(timing_stats.best_time)))
+        
+        if timing_stats.best_time > 0 then
+            local improvement = 0
+            if timing_stats.last_time > 0 and timing_stats.best_time > 0 then
+                improvement = ((timing_stats.last_time - timing_stats.best_time) / timing_stats.last_time) * 100
+            end
+            local improvement_emoji = improvement > 0 and "📈" or "📉"
+            
+            if timing_stats.best_time ~= timing_stats.last_time then
+                table.insert(success_message, string.format("Best time: %s (%s %.1f%%)", 
+                    format_time(timing_stats.best_time),
+                    improvement_emoji,
+                    improvement))
+            else
+                table.insert(success_message, string.format("🎉 New best time! %s", format_time(timing_stats.best_time)))
+            end
         end
     end
     
