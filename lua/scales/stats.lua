@@ -15,6 +15,7 @@ local last_activity_time = os.time()
 M.auto_pause_timer = nil  -- Make timer accessible
 local AUTO_PAUSE_TIMEOUT = 30  -- 30 seconds of inactivity
 local last_debug_time = 0  -- Track last debug message time
+local is_timer_running = false  -- Track if timer is running
 
 -- Ensure stats directory exists
 local function ensure_stats_dir()
@@ -290,19 +291,20 @@ function M.update_activity_time()
             local stats = M.practice_log.timing_stats[pattern_name]
             if stats and stats.is_paused then
                 M.resume_timing(pattern_name)
-                -- Restart the timer
-                M.start_auto_pause_timer()
             end
         end
     end
     
-    vim.schedule(function()
-        vim.notify(string.format("Activity detected - Old time: %d, New time: %d, Time since last activity: %d", 
-            old_time, 
-            last_activity_time,
-            last_activity_time - old_time), 
-            vim.log.levels.INFO)
-    end)
+    -- Only show debug message every 5 seconds
+    local current_time = os.time()
+    if current_time - last_debug_time >= 5 then
+        last_debug_time = current_time
+        vim.schedule(function()
+            vim.notify(string.format("Activity detected - Time since last activity: %d seconds", 
+                current_time - old_time), 
+                vim.log.levels.INFO)
+        end)
+    end
 end
 
 -- Check if timing is paused for current pattern
@@ -333,18 +335,17 @@ end
 
 -- Start auto-pause timer
 function M.start_auto_pause_timer()
-    -- Stop any existing timer
-    if M.auto_pause_timer then
-        M.auto_pause_timer:stop()
-        M.auto_pause_timer:close()
-        M.auto_pause_timer = nil
+    -- Only start if not already running
+    if is_timer_running then
+        return
     end
     
     -- Reset activity tracking
     last_activity_time = os.time()
     last_debug_time = os.time()
+    is_timer_running = true
     
-    vim.notify("Starting timer with last_activity_time: " .. last_activity_time, vim.log.levels.INFO)
+    vim.notify("Starting auto-pause timer", vim.log.levels.INFO)
     
     -- Create and start new timer
     M.auto_pause_timer = vim.loop.new_timer()
@@ -352,20 +353,9 @@ function M.start_auto_pause_timer()
         local current_time = os.time()
         local inactive_time = current_time - last_activity_time
         
-        -- Debug: Always show current state
-        vim.schedule(function()
-            vim.notify(string.format("Timer running - Current time: %d, Last activity: %d, Inactive for: %d seconds, Auto-pause timeout: %d", 
-                current_time, 
-                last_activity_time, 
-                inactive_time,
-                AUTO_PAUSE_TIMEOUT), 
-                vim.log.levels.INFO)
-        end)
-        
         -- Only show debug message every 5 seconds
         if current_time - last_debug_time >= 5 then
             last_debug_time = current_time
-            -- Use vim.schedule to safely update UI
             vim.schedule(function()
                 vim.notify(string.format("Inactive for %d seconds", inactive_time), vim.log.levels.INFO)
             end)
@@ -386,7 +376,6 @@ function M.start_auto_pause_timer()
                         -- Pause timing
                         M.pause_timing(pattern_name)
                         
-                        -- Use vim.schedule to safely update UI
                         vim.schedule(function()
                             vim.notify(string.format("Auto-paused timing for %s after %d seconds of inactivity", 
                                 pattern_name, 
@@ -395,9 +384,6 @@ function M.start_auto_pause_timer()
                             
                             -- Update statusline
                             vim.api.nvim_exec_autocmds('User', { pattern = 'ScalesTimingStatusChanged' })
-                            
-                            -- Stop the timer since we're paused
-                            M.stop_auto_pause_timer()
                         end)
                     end
                 end
@@ -412,6 +398,7 @@ function M.stop_auto_pause_timer()
         M.auto_pause_timer:stop()
         M.auto_pause_timer:close()
         M.auto_pause_timer = nil
+        is_timer_running = false
     end
 end
 
