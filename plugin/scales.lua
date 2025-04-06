@@ -50,6 +50,96 @@ local function configure_templates_dir()
     return true
 end
 
+-- Register commands
+vim.api.nvim_create_user_command('ScalesGenerate', function(args)
+    local core = require('scales.core')
+    core.generate_practice(args.args)
+end, {
+    nargs = '?',
+    complete = function()
+        return M.config.patterns
+    end,
+    desc = 'Generate a coding practice template'
+})
+
+vim.api.nvim_create_user_command('ScalesOpen', function()
+    local core = require('scales.core')
+    core.open_current_practice()
+end, {
+    desc = 'Open most recent practice file'
+})
+
+vim.api.nvim_create_user_command('ScalesValidate', function()
+    local core = require('scales.core')
+    core.validate_practice()
+end, {
+    desc = 'Validate current practice against template'
+})
+
+vim.api.nvim_create_user_command('ScalesList', function()
+    local core = require('scales.core')
+    core.list_patterns()
+end, {
+    desc = 'List available patterns'
+})
+
+vim.api.nvim_create_user_command('ScalesStats', function()
+    local core = require('scales.core')
+    core.show_progress()
+end, {
+    desc = 'Show practice statistics'
+})
+
+vim.api.nvim_create_user_command('ScalesPeek', function()
+    local core = require('scales.core')
+    core.peek_template()
+end, {
+    desc = 'Peek at template solution'
+})
+
+vim.api.nvim_create_user_command('ScalesNext', function()
+    local core = require('scales.core')
+    core.generate_practice()
+end, {
+    desc = 'Generate next practice session'
+})
+
+vim.api.nvim_create_user_command('ScalesResetStats', function()
+    local core = require('scales.core')
+    core.reset_current_stats()
+end, {
+    desc = 'Reset statistics for current practice'
+})
+
+vim.api.nvim_create_user_command('ScalesReload', function()
+    -- Clear cached modules
+    package.loaded['scales.core'] = nil
+    package.loaded['scales.patterns'] = nil
+    package.loaded['scales.stats'] = nil
+    package.loaded['scales.validation'] = nil
+    package.loaded['scales.ui'] = nil
+    
+    -- Reset templates loaded flag
+    local patterns = require('scales.patterns')
+    patterns._templates_loaded = false
+    
+    -- Re-run setup
+    M.setup(M.config)
+    vim.notify("Scales plugin reloaded", vim.log.levels.INFO)
+end, {
+    desc = 'Reload Scales plugin'
+})
+
+-- Set up key mappings
+vim.keymap.set('n', '<leader>sg', ':ScalesGenerate<CR>', { silent = true, desc = 'Scales: Generate Practice' })
+vim.keymap.set('n', '<leader>so', ':ScalesOpen<CR>', { silent = true, desc = 'Scales: Open Practice' })
+vim.keymap.set('n', '<leader>sv', ':ScalesValidate<CR>', { silent = true, desc = 'Scales: Validate Practice' })
+vim.keymap.set('n', '<leader>sl', ':ScalesList<CR>', { silent = true, desc = 'Scales: List Patterns' })
+vim.keymap.set('n', '<leader>ss', ':ScalesStats<CR>', { silent = true, desc = 'Scales: Show Stats' })
+vim.keymap.set('n', '<leader>sn', ':ScalesNext<CR>', { silent = true, desc = 'Scales: Next Practice' })
+vim.keymap.set('n', '<leader>sp', ':ScalesPeek<CR>', { silent = true, desc = 'Scales: Peek Template' })
+vim.keymap.set('n', '<leader>sr', ':ScalesResetStats<CR>', { silent = true, desc = 'Scales: Reset Stats' })
+
 -- Setup function
 function M.setup(opts)
     -- Prevent multiple initializations
@@ -96,88 +186,6 @@ function M.setup(opts)
     patterns.patterns = patterns.load_templates()
     M.config.patterns = vim.tbl_keys(patterns.patterns)
     stats.load_stats()
-    
-    -- Register commands
-    vim.api.nvim_create_user_command('ScalesGenerate', function(args)
-        core.generate_practice(args.args)
-    end, {
-        nargs = '?',
-        complete = function()
-            return M.config.patterns
-        end,
-        desc = 'Generate a coding practice template'
-    })
-    
-    vim.api.nvim_create_user_command('ScalesOpen', function()
-        core.open_current_practice()
-    end, {
-        desc = 'Open most recent practice file'
-    })
-    
-    vim.api.nvim_create_user_command('ScalesValidate', function()
-        core.validate_practice()
-    end, {
-        desc = 'Validate current practice against template'
-    })
-    
-    vim.api.nvim_create_user_command('ScalesList', function()
-        core.list_patterns()
-    end, {
-        desc = 'List available patterns'
-    })
-    
-    vim.api.nvim_create_user_command('ScalesStats', function()
-        core.show_progress()
-    end, {
-        desc = 'Show practice statistics'
-    })
-    
-    vim.api.nvim_create_user_command('ScalesPeek', function()
-        core.peek_template()
-    end, {
-        desc = 'Peek at template solution'
-    })
-    
-    vim.api.nvim_create_user_command('ScalesNext', function()
-        core.generate_practice()
-    end, {
-        desc = 'Generate next practice session'
-    })
-    
-    vim.api.nvim_create_user_command('ScalesResetStats', function()
-        core.reset_current_stats()
-    end, {
-        desc = 'Reset statistics for current practice'
-    })
-    
-    vim.api.nvim_create_user_command('ScalesReload', function()
-        -- Clear cached modules
-        package.loaded['scales.core'] = nil
-        package.loaded['scales.patterns'] = nil
-        package.loaded['scales.stats'] = nil
-        package.loaded['scales.validation'] = nil
-        package.loaded['scales.ui'] = nil
-        
-        -- Reset templates loaded flag
-        local patterns = require('scales.patterns')
-        patterns._templates_loaded = false
-        
-        -- Re-run setup
-        M.setup(M.config)
-        vim.notify("Scales plugin reloaded", vim.log.levels.INFO)
-    end, {
-        desc = 'Reload Scales plugin'
-    })
-    
-    -- Set up key mappings
-    vim.keymap.set('n', '<leader>sg', ':ScalesGenerate<CR>', { silent = true, desc = 'Scales: Generate Practice' })
-    vim.keymap.set('n', '<leader>so', ':ScalesOpen<CR>', { silent = true, desc = 'Scales: Open Practice' })
-    vim.keymap.set('n', '<leader>sv', ':ScalesValidate<CR>', { silent = true, desc = 'Scales: Validate Practice' })
-    vim.keymap.set('n', '<leader>sl', ':ScalesList<CR>', { silent = true, desc = 'Scales: List Patterns' })
-    vim.keymap.set('n', '<leader>ss', ':ScalesStats<CR>', { silent = true, desc = 'Scales: Show Stats' })
-    vim.keymap.set('n', '<leader>sn', ':ScalesNext<CR>', { silent = true, desc = 'Scales: Next Practice' })
-    vim.keymap.set('n', '<leader>sp', ':ScalesPeek<CR>', { silent = true, desc = 'Scales: Peek Template' })
-    vim.keymap.set('n', '<leader>sr', ':ScalesResetStats<CR>', { silent = true, desc = 'Scales: Reset Stats' })
     
     -- Expose UI functions
     M.ui = ui
