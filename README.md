@@ -62,10 +62,10 @@ Most developers struggle with technical interviews because they're missing a cru
 
 | Scales (Fundamentals) | Solos (Complex Problems) |
 |----------------------|-------------------------|
-| Binary Search | Longest Palindromic Substring |
-| Two Pointers | Course Schedule |
-| Sliding Window | N-Queens |
-| Prefix Sum | LRU Cache |
+| Binary Search | Find Peak Element |
+| Two Pointers | Container With Most Water |
+| Sliding Window | Longest Substring Without Repeating Characters |
+| Prefix Sum | Subarray Sum Equals K |
 
 *Each fundamental pattern (scale) builds the foundation for solving more complex problems (solos). Master the scales first, and the solos will become much easier to play!*
 
@@ -79,52 +79,297 @@ Take Eddie Van Halen's "Eruption" - while it sounds incredibly complex, it's bui
 ### Coding Templates: The Building Blocks of Algorithms
 Just like musical scales, coding templates are fundamental patterns that form the building blocks of more complex algorithms. Here are some examples from our templates:
 
-#### 1. Binary Search Template
+<details>
+<summary>1. Binary Search Template</summary>
+
 ```python
-def binary_search(arr, target):
-    left = 0
-    right = len(arr) - 1
-    
+def binary_search(arr: List[int], target: int) -> int:
+    left, right = 0, len(arr) - 1
+    first_true_index = -1
     while left <= right:
         mid = (left + right) // 2
-        if arr[mid] == target:
-            return mid
-        elif arr[mid] < target:
-            left = mid + 1
-        else:
+        if feasible(mid):
+            first_true_index = mid
             right = mid - 1
+        else:
+            left = mid + 1
     
-    return -1
+    return first_true_index
 ```
 
-#### 2. Two Pointers (Same Direction) Template
+**Example Problem: Find First Bad Version**
 ```python
-def two_pointers_same_direction(arr):
-    slow = 0
-    for fast in range(len(arr)):
-        if condition(arr[fast]):
-            arr[slow] = arr[fast]
+def isBadVersion(version: int) -> bool:
+    # API function provided by the system
+    pass
+
+def firstBadVersion(n: int) -> int:
+    left, right = 1, n
+    first_bad = n
+    while left <= right:
+        mid = (left + right) // 2
+        if isBadVersion(mid):
+            first_bad = mid
+            right = mid - 1
+        else:
+            left = mid + 1
+    return first_bad
+```
+</details>
+
+<details>
+<summary>2. Two Pointers (Same Direction) Template</summary>
+
+```python
+def two_pointers_same(arr):
+    slow, fast = 0, 0
+    while fast < len(arr):
+        # Process current elements
+        current = process(arr[slow], arr[fast])
+
+        # Update pointers based on condition
+        if condition(arr[slow], arr[fast]):
             slow += 1
-    return slow
+
+        # Fast pointer always moves forward
+        fast += 1
 ```
 
-#### 3. Sliding Window (Fixed Size) Template
+**Example Problem: Remove Duplicates from Sorted Array**
 ```python
-def sliding_window_fixed(arr, k):
-    window_sum = sum(arr[:k])
+def removeDuplicates(nums: List[int]) -> int:
+    slow = 0
+    for fast in range(len(nums)):
+        if nums[fast] != nums[slow]:
+            slow += 1
+            nums[slow] = nums[fast]
+    return slow + 1
+```
+</details>
+
+<details>
+<summary>3. Sliding Window (Fixed Size) Template</summary>
+
+```python
+def sliding_window_fixed(input, window_size):
+    ans = window = input[0:window_size]
+    for right in range(window_size, len(input)):
+        left = right - window_size
+        remove input[left] from window
+        append input[right] to window
+        ans = optimal(ans, window)
+    return ans
+```
+
+**Example Problem: Maximum Average Subarray**
+```python
+def findMaxAverage(nums: List[int], k: int) -> float:
+    window_sum = sum(nums[:k])
     max_sum = window_sum
     
-    for i in range(k, len(arr)):
-        window_sum = window_sum - arr[i-k] + arr[i]
+    for right in range(k, len(nums)):
+        left = right - k
+        window_sum = window_sum - nums[left] + nums[right]
         max_sum = max(max_sum, window_sum)
     
-    return max_sum
+    return max_sum / k
+```
+</details>
+
+<details>
+<summary>4. Prefix Sum Template</summary>
+
+```python
+def build_prefix_sum(arr):
+    n = len(arr)
+    prefix_sum = [0] * n
+    prefix_sum[0] = arr[0]
+    for i in range(1, n):
+        prefix_sum[i] = prefix_sum[i-1] + arr[i]
+    return prefix_sum
+
+# Query sum of range [left, right] (inclusive)
+def query_range(prefix_sum, left, right):
+    if left == 0:
+        return prefix_sum[right]
+    return prefix_sum[right] - prefix_sum[left-1]
 ```
 
-Just as a guitarist practices scales to build the foundation for solos, these templates form the foundation for solving complex coding problems. When you master these patterns, you'll be able to:
-- Recognize when to apply each pattern
-- Implement them quickly and accurately
-- Combine them to solve more complex problems
+**Example Problem: Subarray Sum Equals K**
+```python
+def subarraySum(nums: List[int], k: int) -> int:
+    prefix_sum = {0: 1}
+    current_sum = 0
+    count = 0
+    
+    for num in nums:
+        current_sum += num
+        if current_sum - k in prefix_sum:
+            count += prefix_sum[current_sum - k]
+        prefix_sum[current_sum] = prefix_sum.get(current_sum, 0) + 1
+    
+    return count
+```
+</details>
+
+<details>
+<summary>5. DFS on Tree Template</summary>
+
+```python
+def dfs(root, target):
+    if root is None:
+        return None
+    if root.val == target:
+        return root
+    left = dfs(root.left, target)
+    if left is not None:
+        return left
+    return dfs(root.right, target)
+```
+
+**Example Problem: Path Sum**
+```python
+def hasPathSum(root: TreeNode, targetSum: int) -> bool:
+    if not root:
+        return False
+    if not root.left and not root.right:
+        return targetSum == root.val
+    return (hasPathSum(root.left, targetSum - root.val) or 
+            hasPathSum(root.right, targetSum - root.val))
+```
+</details>
+
+<details>
+<summary>6. BFS on Tree Template</summary>
+
+```python
+def bfs(root):
+    queue = deque([root])
+    while len(queue) > 0:
+        node = queue.popleft()
+        for child in node.children:
+            if is_goal(child):
+                return FOUND(child)
+            queue.append(child)
+    return NOT_FOUND
+```
+
+**Example Problem: Binary Tree Level Order Traversal**
+```python
+def levelOrder(root: TreeNode) -> List[List[int]]:
+    if not root:
+        return []
+    
+    result = []
+    queue = deque([root])
+    
+    while queue:
+        level_size = len(queue)
+        level = []
+        for _ in range(level_size):
+            node = queue.popleft()
+            level.append(node.val)
+            if node.left:
+                queue.append(node.left)
+            if node.right:
+                queue.append(node.right)
+        result.append(level)
+    
+    return result
+```
+</details>
+
+<details>
+<summary>7. Backtracking Template</summary>
+
+```python
+ans = []
+def dfs(start_index, path, [...additional states]):
+    if is_leaf(start_index):
+        ans.append(path[:]) # add a copy of the path to the result
+        return
+    for edge in get_edges(start_index, [...additional states]):
+        # prune if needed
+        if not is_valid(edge):
+            continue
+        path.add(edge)
+        if additional states:
+            update(...additional states)
+        dfs(start_index + len(edge), path, [...additional states])
+        # revert(...additional states) if necessary e.g permutations
+        path.pop()
+```
+
+**Example Problem: Subsets**
+```python
+def subsets(nums: List[int]) -> List[List[int]]:
+    result = []
+    
+    def backtrack(start, path):
+        result.append(path[:])
+        for i in range(start, len(nums)):
+            path.append(nums[i])
+            backtrack(i + 1, path)
+            path.pop()
+    
+    backtrack(0, [])
+    return result
+```
+</details>
+
+<details>
+<summary>8. Dynamic Programming (Top-Down) Template</summary>
+
+```python
+def solve_problem(input):
+    # Option 1: Dictionary for memoization
+    memo = {}
+
+    def dp(state):
+        # 1. Base cases - when we can answer directly
+        if is_base_case(state):
+            return base_case_result
+
+        # 2. Check if already computed
+        if state in memo:
+            return memo[state]
+
+        # 3. Recursive case - explore all possibilities
+        result = initial_value # Often 0, float('-inf'), float('inf'), etc.
+
+        for next_state in get_possible_next_states(state):
+            # Calculate result for this choice
+            subproblem_result = dp(next_state)
+
+            # Combine with current result (min, max, sum, etc.)
+            result = combine(result, subproblem_result)
+
+        # 4. Cache result and return
+        memo[state] = result
+        return result
+
+    # 5. Start recursion from the initial state
+    return dp(starting_state)
+```
+
+**Example Problem: Climbing Stairs**
+```python
+def climbStairs(n: int) -> int:
+    memo = {}
+    
+    def dp(steps):
+        if steps <= 2:
+            return steps
+        if steps in memo:
+            return memo[steps]
+        memo[steps] = dp(steps - 1) + dp(steps - 2)
+        return memo[steps]
+    
+    return dp(n)
+```
+</details>
+
+Each template follows a consistent pattern that can be applied to various problems. By practicing these scales, you build the muscle memory needed to recognize and implement these patterns quickly and accurately.
 
 ## 🚀 Getting Started
 
