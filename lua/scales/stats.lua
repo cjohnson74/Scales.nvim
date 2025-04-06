@@ -37,6 +37,25 @@ function M.start_timing(pattern_name)
     end
 end
 
+-- Pause timing for a practice session
+function M.pause_timing(pattern_name)
+    if not M.practice_log.timing_stats[pattern_name] then
+        return
+    end
+    
+    local stats = M.practice_log.timing_stats[pattern_name]
+    local current_time = os.time()
+    local time_elapsed = current_time - stats.start_time
+    
+    -- Update last time if it's better than the current best
+    if stats.best_time == 0 or time_elapsed < stats.best_time then
+        stats.best_time = time_elapsed
+    end
+    
+    stats.last_time = time_elapsed
+    stats.start_time = current_time  -- Reset start time for next session
+end
+
 -- Track a validation attempt
 function M.track_attempt(file_path)
     M.practice_log.attempt_stats[file_path] = (M.practice_log.attempt_stats[file_path] or 0) + 1
