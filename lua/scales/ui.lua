@@ -435,4 +435,44 @@ function M.show_success_message(pattern_name, is_first_validation)
     })
 end
 
+-- Show commands and key mappings
+function M.show_commands()
+    local commands = {
+        "╭────────────────────────────────────────────╮",
+        "│            🎸 SCALES COMMANDS 🎸            │",
+        "╰────────────────────────────────────────────╯",
+        "",
+        "Commands:",
+        "════════════════════════",
+        "  :ScalesGenerate [pattern]  - Start new practice",
+        "  :ScalesOpen               - Open recent practice",
+        "  :ScalesList               - Browse patterns",
+        "  :ScalesStats              - Show progress",
+        "  :ScalesValidate           - Test implementation",
+        "  :ScalesPeek               - View solution",
+        "  :ScalesNext               - Next practice",
+        "  :ScalesReload             - Refresh templates",
+        "  :ScalesSetup              - Re-run setup",
+        "",
+        "Key Mappings:",
+        "════════════════════════",
+        "  \\sg  - Generate practice",
+        "  \\so  - Open practice",
+        "  \\sv  - Validate code",
+        "  \\sl  - List patterns",
+        "  \\ss  - Show stats",
+        "  \\sn  - Next practice",
+        "  \\sp  - Peek solution",
+        "",
+        "╭────────────────────────────────────────────╮",
+        "│ Press q or <Esc> to close                  │",
+        "╰────────────────────────────────────────────╯"
+    }
+    
+    M.show_popup(commands, {
+        title = "Scales Commands",
+        border = "rounded"
+    })
+end
+
 return M

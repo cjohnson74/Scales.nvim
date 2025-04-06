@@ -57,6 +57,11 @@ vim.api.nvim_create_user_command('ScalesSetup', function()
     require('scales').setup()
 end, {})
 
+vim.api.nvim_create_user_command('ScalesCommands', function()
+    local ui = require('scales.ui')
+    ui.show_commands()
+end, {})
+
 -- Set default key mappings
 vim.keymap.set('n', '<leader>sg', ':ScalesGenerate<CR>', { silent = true })
 vim.keymap.set('n', '<leader>so', ':ScalesOpen<CR>', { silent = true })

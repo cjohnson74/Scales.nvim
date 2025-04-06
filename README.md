@@ -377,10 +377,22 @@ Each template follows a consistent pattern that can be applied to various proble
 
 ### Quick Start Guide
 
-1. **Install the Plugin** (see Installation section below)
-2. **Start with Basics**
+1. **Start Neovim**:
+   ```bash
+   nvim
+   ```
+
+2. **Generate your first practice**:
    ```vim
-   :ScalesGenerate sliding_window_fixed_size
+   :ScalesGenerate
+   ```
+   This creates a new Python file with instructions
+
+3. **Write your code** in the practice file
+
+4. **Validate your code**:
+   ```vim
+   :ScalesValidate
    ```
 3. **Practice Regularly**
    - Focus on understanding the pattern (like learning a new scale)
@@ -497,56 +509,38 @@ require('scales').setup({
 
 > 🎵 *"Practice until you can play it in your sleep"*
 
-### Understanding Key Mappings
-- `<leader>` is like your capo - it changes how other keys work
-- For example, `<leader>sg` means press `\` then `s` then `g`
-- You can change your leader key in your `init.lua`:
-  ```lua
-  vim.g.mapleader = ','  -- Change leader to comma
-  ```
+### Available Commands
 
-### Commands
-You can use these commands in Neovim's command mode (press `:` to enter command mode):
+Run these commands in Neovim's command mode (press `:` to enter command mode):
 
-- `:ScalesGenerate [pattern]` - Start a new practice session
-- `:ScalesOpen` - Open your most recent practice
-- `:ScalesList` - Browse available patterns
-- `:ScalesStats` - Check your practice progress
-- `:ScalesValidate` - Test your implementation
-- `:ScalesPeek` - Look at the solution
-- `:ScalesNext` - Move to next practice
-- `:ScalesReload` - Refresh templates
-- `:ScalesSetup` - Re-run plugin setup
+| Command | Description |
+|---------|-------------|
+| `:ScalesGenerate [pattern]` | Start a new practice session (optionally specify a pattern) |
+| `:ScalesOpen` | Open your most recent practice file |
+| `:ScalesList` | Browse available patterns |
+| `:ScalesStats` | Check your practice progress |
+| `:ScalesValidate` | Test your implementation |
+| `:ScalesPeek` | Look at the solution |
+| `:ScalesNext` | Move to next practice |
+| `:ScalesReload` | Refresh templates |
+| `:ScalesSetup` | Re-run plugin setup |
+| `:ScalesCommands` | Show all available commands and key mappings |
 
-### Quick Start Guide
+### Key Mappings
 
-1. **Start Neovim**:
-   ```bash
-   nvim
-   ```
+These key mappings are available in normal mode:
 
-2. **Generate your first practice**:
-   ```vim
-   :ScalesGenerate
-   ```
-   This creates a new Python file with instructions
+| Mapping | Command | Description |
+|---------|---------|-------------|
+| `\sg` | `:ScalesGenerate` | Generate new practice |
+| `\so` | `:ScalesOpen` | Open practice file |
+| `\sv` | `:ScalesValidate` | Validate your code |
+| `\sl` | `:ScalesList` | List patterns |
+| `\ss` | `:ScalesStats` | Show statistics |
+| `\sn` | `:ScalesNext` | Next practice |
+| `\sp` | `:ScalesPeek` | Peek at solution |
 
-   ![Pattern Selection](docs/pattern-selection.png)
-   *Browse available patterns with difficulty indicators*
-
-3. **Write your code** in the practice file
-
-   ![Practice Interface](docs/practice.png)
-   *The practice interface with instructions and code area*
-
-4. **Validate your code**:
-   ```vim
-   :ScalesValidate
-   ```
-   You'll see feedback on your implementation
-
-   ![Validation Success](docs/validation-success.png)
-   *Celebrate your success with detailed feedback*
+> 💡 Tip: You can view all commands and mappings at any time by running `:ScalesCommands`
 
 ### Practice Workflow
 
@@ -565,15 +559,9 @@ You can use these commands in Neovim's command mode (press `:` to enter command 
    - Earn achievements as you improve
    - Track your timing improvements
 
-   ![Statistics View](docs/statistics.png)
-   *Track your progress and achievements*
-
 > 🎸 *"The more you practice, the luckier you get"*
 
 ### Pattern Difficulty Levels
-
-![Pattern Selection Interface](docs/pattern_selection.gif)
-*Pattern selection interface showing difficulty levels with star ratings:*
 
 - 🎸 **Beginner Patterns** (1-2 stars)
   - [1] Sliding Window Fixed Size
@@ -620,13 +608,6 @@ You can use these commands in Neovim's command mode (press `:` to enter command 
     - Practice dynamic programming top-down technique
   - [19] DP Bottom Up
     - Practice dynamic programming bottom-up technique
-
-Each pattern includes:
-- Visual difficulty indicator (⭐)
-- Pattern ID (in brackets) for easy reference
-- Clear description of the technique
-- Practice instructions
-- Template implementation for validation
 
 ## 🏆 Achievements
 
