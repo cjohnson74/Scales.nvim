@@ -168,4 +168,24 @@ function M.reset_practice()
     vim.cmd('edit ' .. current_file)
 end
 
+-- Show pattern information
+function M.show_about()
+    local current_file = vim.fn.expand('%:p')
+    if not current_file:match('practice%.py$') then
+        vim.notify("Not in a practice file", vim.log.levels.ERROR)
+        return
+    end
+    
+    local pattern_dir = vim.fn.fnamemodify(current_file, ':h')
+    local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
+    
+    if not pattern_name or pattern_name == '' then
+        vim.notify("Could not determine pattern name", vim.log.levels.ERROR)
+        return
+    end
+    
+    local patterns = require('scales.patterns')
+    patterns.show_about(pattern_name)
+end
+
 return M

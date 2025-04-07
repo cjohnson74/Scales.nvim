@@ -137,6 +137,13 @@ end, {
     desc = 'Reset current practice file to start fresh'
 })
 
+vim.api.nvim_create_user_command('ScalesAbout', function()
+    local core = require('scales.core')
+    core.show_about()
+end, {
+    desc = 'Show information about the current pattern'
+})
+
 -- Set up key mappings
 vim.keymap.set('n', '<leader>sg', ':ScalesGenerate<CR>', { silent = true, desc = 'Scales: Generate Practice' })
 vim.keymap.set('n', '<leader>so', ':ScalesOpen<CR>', { silent = true, desc = 'Scales: Open Practice' })
@@ -146,6 +153,7 @@ vim.keymap.set('n', '<leader>ss', ':ScalesStats<CR>', { silent = true, desc = 'S
 vim.keymap.set('n', '<leader>sn', ':ScalesNext<CR>', { silent = true, desc = 'Scales: Next Practice' })
 vim.keymap.set('n', '<leader>sp', ':ScalesPeek<CR>', { silent = true, desc = 'Scales: Peek Template' })
 vim.keymap.set('n', '<leader>sr', ':ScalesReset<CR>', { silent = true, desc = 'Scales: Reset Practice' })
+vim.keymap.set('n', '<leader>sa', ':ScalesAbout<CR>', { silent = true, desc = 'Scales: Show Pattern Info' })
 
 -- Setup function
 function M.setup(opts)

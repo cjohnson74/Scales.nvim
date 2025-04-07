@@ -516,4 +516,63 @@ function M.peek_template()
     vim.api.nvim_win_set_option(win, 'winhl', 'Normal:NormalFloat')
 end
 
+-- Add about information to pattern data structure
+local function load_pattern_about(pattern_name)
+    local about_file = M.config.templates_dir .. '/' .. pattern_name .. '/about.md'
+    if vim.fn.filereadable(about_file) == 1 then
+        return vim.fn.readfile(about_file)
+    end
+    return {
+        "No about information available for this pattern.",
+        "Consider adding an about.md file in the pattern's template directory."
+    }
+end
+
+-- Show pattern information
+function M.show_about(pattern_name)
+    local pattern = M.patterns[pattern_name]
+    if not pattern then
+        vim.notify("Pattern not found: " .. pattern_name, vim.log.levels.ERROR)
+        return
+    end
+    
+    local about_content = load_pattern_about(pattern_name)
+    local ui = require('scales.ui')
+    
+    local content = {
+        "╭────────────────────────────────────────────╮",
+        "│            🎸 PATTERN OVERVIEW 🎸           │",
+        "╰────────────────────────────────────────────╯",
+        "",
+        string.format("Pattern: %s", pattern.name),
+        string.format("Difficulty: %s", string.rep("⭐", pattern.difficulty)),
+        "",
+        "Description:",
+        "════════════════════════",
+        pattern.description,
+        "",
+        "About:",
+        "════════════════════════"
+    }
+    
+    -- Add about content
+    for _, line in ipairs(about_content) do
+        table.insert(content, line)
+    end
+    
+    -- Add usage instructions
+    table.insert(content, "")
+    table.insert(content, "Usage:")
+    table.insert(content, "════════════════════════")
+    table.insert(content, "1. Press \\sp to peek at the template")
+    table.insert(content, "2. Implement the pattern from scratch")
+    table.insert(content, "3. Press \\sv to validate your implementation")
+    table.insert(content, "4. Press \\sr to reset and try again")
+    
+    ui.show_popup(content, {
+        title = "Pattern Information",
+        border = "rounded"
+    })
+end
+
 return M 
