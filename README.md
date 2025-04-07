@@ -522,7 +522,7 @@ Run these commands in Neovim's command mode (press `:` to enter command mode):
 | `:ScalesValidate` | Test your implementation |
 | `:ScalesPeek` | Look at the solution |
 | `:ScalesNext` | Move to next practice |
-| `:ScalesResetStats` | Reset statistics for current practice |
+| `:ScalesReset` | Reset current practice file to start fresh |
 | `:ScalesReload` | Refresh templates |
 | `:ScalesCommands` | Show all available commands and key mappings |
 
@@ -539,7 +539,7 @@ These key mappings are available in normal mode:
 | `\ss` | `:ScalesStats` | Show statistics |
 | `\sn` | `:ScalesNext` | Next practice |
 | `\sp` | `:ScalesPeek` | Peek at solution |
-| `\sr` | `:ScalesResetStats` | Reset current practice stats |
+| `\sr` | `:ScalesReset` | Reset current practice file |
 
 > 💡 Tip: You can view all commands and mappings at any time by running `:ScalesCommands`
 

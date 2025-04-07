@@ -129,4 +129,43 @@ function M.reset_current_stats()
     stats.reset_current_timing()
 end
 
+-- Reset current practice file
+function M.reset_practice()
+    local current_file = vim.fn.expand('%:p')
+    if not current_file:match('practice%.py$') then
+        vim.notify("Not in a practice file", vim.log.levels.ERROR)
+        return
+    end
+    
+    -- Check if current buffer has unsaved changes
+    if vim.bo.modified then
+        local choice = vim.fn.confirm("Current buffer has unsaved changes. Save?", "&Yes\n&No\n&Cancel", 1)
+        if choice == 1 then
+            vim.cmd('write')
+        elseif choice == 3 then
+            return
+        end
+    end
+    
+    local pattern_dir = vim.fn.fnamemodify(current_file, ':h')
+    local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
+    
+    -- Reset the practice file with instructions
+    local instructions = {
+        string.format("# Practice: %s", pattern_name),
+        "# Implement the pattern from scratch",
+        "# When ready, run :ScalesValidate to check your implementation",
+        "",
+        "# Your implementation goes here:",
+        ""
+    }
+    vim.fn.writefile(instructions, current_file)
+    
+    -- Reset timing for this practice
+    stats.reset_current_timing()
+    
+    -- Open the reset file
+    vim.cmd('edit ' .. current_file)
+end
+
 return M
