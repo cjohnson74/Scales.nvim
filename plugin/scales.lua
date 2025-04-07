@@ -130,6 +130,13 @@ end, {
     desc = 'Reload Scales plugin'
 })
 
+vim.api.nvim_create_user_command('ScalesCommands', function()
+    local ui = require('scales.ui')
+    ui.show_commands()
+end, {
+    desc = 'Show all available commands and key mappings'
+})
+
 -- Set up key mappings
 vim.keymap.set('n', '<leader>sg', ':ScalesGenerate<CR>', { silent = true, desc = 'Scales: Generate Practice' })
 vim.keymap.set('n', '<leader>so', ':ScalesOpen<CR>', { silent = true, desc = 'Scales: Open Practice' })
