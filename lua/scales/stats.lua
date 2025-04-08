@@ -27,7 +27,7 @@ end
 function M.start_timing(pattern_name)
     if not M.practice_log.timing_stats[pattern_name] then
         M.practice_log.timing_stats[pattern_name] = {
-            start_time = vim.loop.hrtime(),
+            start_time = vim.loop.hrtime() / 1e9,  -- Convert to seconds immediately
             last_time = 0,
             best_time = 0,
             total_practices = 0,
@@ -35,7 +35,7 @@ function M.start_timing(pattern_name)
             previous_time = 0
         }
     else
-        M.practice_log.timing_stats[pattern_name].start_time = vim.loop.hrtime()
+        M.practice_log.timing_stats[pattern_name].start_time = vim.loop.hrtime() / 1e9  -- Convert to seconds immediately
     end
 end
 
@@ -46,8 +46,8 @@ function M.pause_timing(pattern_name)
     end
     
     local stats = M.practice_log.timing_stats[pattern_name]
-    local current_time = vim.loop.hrtime()
-    local time_elapsed = (current_time - stats.start_time) / 1e9  -- Convert nanoseconds to seconds
+    local current_time = vim.loop.hrtime() / 1e9  -- Convert to seconds immediately
+    local time_elapsed = current_time - stats.start_time
     
     -- Only update last time, not best time
     stats.last_time = time_elapsed
@@ -73,7 +73,7 @@ function M.end_timing(file_path)
     
     if not M.practice_log.timing_stats[pattern_name] then
         M.practice_log.timing_stats[pattern_name] = {
-            start_time = vim.loop.hrtime(),
+            start_time = vim.loop.hrtime() / 1e9,  -- Convert to seconds immediately
             last_time = 0,
             best_time = 0,
             total_practices = 0,
@@ -83,8 +83,8 @@ function M.end_timing(file_path)
     end
     
     local stats = M.practice_log.timing_stats[pattern_name]
-    local end_time = vim.loop.hrtime()
-    local time_taken = (end_time - stats.start_time) / 1e9  -- Convert nanoseconds to seconds
+    local end_time = vim.loop.hrtime() / 1e9  -- Convert to seconds immediately
+    local time_taken = end_time - stats.start_time
     
     -- Store previous time before updating
     local previous_time = stats.last_time or 0
@@ -292,7 +292,7 @@ function M.reset_current_timing()
     -- Reset timing stats for this pattern
     if M.practice_log.timing_stats[pattern_name] then
         M.practice_log.timing_stats[pattern_name] = {
-            start_time = vim.loop.hrtime(),
+            start_time = vim.loop.hrtime() / 1e9,  -- Convert to seconds immediately
             last_time = 0,
             best_time = 0,
             total_practices = 0,
@@ -311,7 +311,7 @@ function M.record_validation(pattern_name, attempt_count)
     end
     
     local stats = M.practice_log.timing_stats[pattern_name]
-    local current_time = (vim.loop.hrtime() - stats.start_time) / 1e9  -- Convert nanoseconds to seconds
+    local current_time = (vim.loop.hrtime() / 1e9) - stats.start_time  -- Convert to seconds immediately
     
     -- Store previous time before updating
     local previous_time = stats.last_time or 0
