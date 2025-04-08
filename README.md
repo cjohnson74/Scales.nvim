@@ -189,8 +189,40 @@ Earn badges and achievements as you practice:
 
 ## 🔮 Future Features
 
-### Pattern Recognition Quiz
-- `:ScalesQuiz` command to test pattern identification
+### New Pattern Templates (High Priority)
+- Line Sweep algorithm
+- Segment Trees
+- More advanced competitive programming patterns
+  - Heavy-Light Decomposition
+  - Sparse Tables
+  - Fenwick Trees
+
+### Custom Pattern Support (High Priority)
+- Basic Features
+  - Local pattern creation
+  - Simple template validation
+  - Personal practice problems
+- Advanced Features (Future)
+  - Community sharing
+  - GitHub integration
+
+### Menu System (High Priority)
+- Interactive keyboard-driven menus
+  - Main menu with all features
+  - Submenus for each category
+  - Quick navigation with j/k/l/h
+  - Number shortcuts for fast access
+  - Visual feedback and hints
+- Categories:
+  - Practice
+  - Quiz
+  - Template
+  - Custom
+  - Stats
+  - Settings
+
+### Pattern Recognition Quiz (Medium Priority)
+- Interactive quiz interface
 - Uses HackerRank API to fetch real interview problems
   - Problems filtered by difficulty and pattern
   - Randomized selection to prevent memorization
@@ -204,8 +236,8 @@ Earn badges and achievements as you practice:
   - Pattern-specific achievements
   - Performance analytics
 
-### Template Manipulation Quiz
-- Exercises for modifying templates to solve problems
+### Template Manipulation Quiz (Lower Priority)
+- Interactive modification exercises
 - Uses HackerRank API for validation
   - Real problem constraints
   - Comprehensive test cases
@@ -218,25 +250,6 @@ Earn badges and achievements as you practice:
   - Multiple solution approaches
   - Optimization techniques
   - Edge case handling
-
-### New Pattern Templates
-- Line Sweep algorithm
-- Segment Trees
-- More advanced competitive programming patterns
-  - Heavy-Light Decomposition
-  - Sparse Tables
-  - Fenwick Trees
-
-### Custom Pattern Support
-- Add your own patterns and templates
-  - Local pattern creation
-  - Custom validation rules
-  - Personal practice problems
-- Share patterns with the community
-  - Pattern marketplace for sharing templates
-  - Rate and review community patterns
-  - Search and filter patterns by difficulty/tags
-  - Import patterns directly from GitHub
 
 ## 🤝 Contributing
 
