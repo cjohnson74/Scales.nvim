@@ -118,8 +118,9 @@ function M.validate_practice()
         -- Check if this is the first successful validation
         local is_first_success = attempt_count == 1
         
-        -- Update stats
-        local timing_stats = stats.end_timing(current_file)
+        -- Record the successful validation
+        local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
+        stats.record_validation(pattern_name, attempt_count)
         
         ui.show_success_message(pattern_name, is_first_success)
     else

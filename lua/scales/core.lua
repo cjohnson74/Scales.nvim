@@ -96,6 +96,31 @@ end
 
 -- Generate a practice session
 function M.generate_practice(pattern_name)
+    -- Check if current buffer has unsaved changes
+    if vim.bo.modified then
+        vim.cmd('write')
+    end
+
+    -- End timing for current pattern if we're in a practice file
+    local current_file = vim.fn.expand('%:p')
+    if current_file:match('practice%.py$') then
+        local current_pattern_dir = vim.fn.fnamemodify(current_file, ':h')
+        local current_pattern_name = vim.fn.fnamemodify(current_pattern_dir, ':t')
+        if current_pattern_name and current_pattern_name ~= '' then
+            stats.end_timing(current_file)
+        end
+    end
+
+    -- If no pattern specified, choose randomly
+    if not pattern_name or pattern_name == "" then
+        local pattern_keys = vim.tbl_keys(patterns.patterns)
+        if #pattern_keys == 0 then
+            vim.notify("No patterns available. Check your templates directory.", vim.log.levels.ERROR)
+            return
+        end
+        pattern_name = pattern_keys[math.random(#pattern_keys)]
+    end
+    
     patterns.generate_practice(pattern_name)
 end
 

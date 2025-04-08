@@ -395,7 +395,7 @@ function M.show_progress()
 end
 
 -- Show success message
-function M.show_success_message(pattern_name, is_first_validation)
+function M.show_success_message(pattern_name, is_first_validation, current_time)
     local stats = require('scales.stats')
     
     local success_message = {
@@ -407,32 +407,67 @@ function M.show_success_message(pattern_name, is_first_validation)
     -- Add timing information if available
     local timing_stats = stats.practice_log.timing_stats[pattern_name]
     if timing_stats and timing_stats.last_time > 0 then
-        -- Add current attempt time
-        table.insert(success_message, string.format("Time taken: %s", format_time(timing_stats.last_time)))
+        -- Add current attempt time with milliseconds
+        local time_str = string.format("%.3f seconds", timing_stats.last_time)
+        table.insert(success_message, string.format("Time taken: %s", time_str))
         
         -- Add best time with comparison
         if timing_stats.best_time > 0 then
-            -- Calculate time difference
+            -- Calculate time difference with milliseconds
             local time_diff = math.abs(timing_stats.last_time - timing_stats.best_time)
-            local time_diff_str = format_time(time_diff)
+            local time_diff_str = string.format("%.3f seconds", time_diff)
             
             if timing_stats.last_time == timing_stats.best_time then
                 table.insert(success_message, string.format("Best time: %s (🎉 New best time!)", 
-                    format_time(timing_stats.best_time)))
+                    string.format("%.3f seconds", timing_stats.best_time)))
             else
                 if timing_stats.last_time > timing_stats.best_time then
                     -- Current attempt is slower than best
                     table.insert(success_message, string.format("Best time: %s (⏱️ %s to beat)", 
-                        format_time(timing_stats.best_time),
+                        string.format("%.3f seconds", timing_stats.best_time),
                         time_diff_str))
                 else
                     -- Current attempt is faster than best (shouldn't happen, but just in case)
                     table.insert(success_message, string.format("Best time: %s (⏱️ %s improvement)", 
-                        format_time(timing_stats.best_time),
+                        string.format("%.3f seconds", timing_stats.best_time),
                         time_diff_str))
                 end
             end
         end
+        
+        -- Always show previous time if available
+        local previous_time = stats.practice_log.previous_times[pattern_name]
+        if previous_time and previous_time > 0 and previous_time ~= timing_stats.last_time then
+            local improvement = previous_time - timing_stats.last_time
+            local improvement_str = string.format("%.3f seconds", math.abs(improvement))
+            if improvement > 0 then
+                table.insert(success_message, string.format("Previous time: %s (📈 %s faster than last time!)", 
+                    string.format("%.3f seconds", previous_time),
+                    improvement_str))
+            else
+                table.insert(success_message, string.format("Previous time: %s (📉 %s slower than last time)", 
+                    string.format("%.3f seconds", previous_time),
+                    improvement_str))
+            end
+        end
+
+        -- Add practice progress
+        local total_practices = timing_stats.total_practices or 0
+        local first_attempt_successes = timing_stats.first_attempt_successes or 0
+        local success_rate = total_practices > 0 and (first_attempt_successes / total_practices) * 100 or 0
+        
+        table.insert(success_message, "")
+        table.insert(success_message, "📊 Practice Progress:")
+        table.insert(success_message, string.format("  • Total Practices: %d", total_practices))
+        table.insert(success_message, string.format("  • First Attempt Success Rate: %.1f%%", success_rate))
+        
+        -- Add progress bar for pattern mastery
+        local level, emoji = stats.get_achievement_level(total_practices, first_attempt_successes)
+        local progress_width = 20
+        local progress_filled = math.min(math.floor((total_practices / 100) * progress_width), progress_width)
+        local progress_bar = string.rep("█", progress_filled) .. string.rep("░", progress_width - progress_filled)
+        table.insert(success_message, string.format("  • Mastery Level: %s %s", emoji, level))
+        table.insert(success_message, string.format("  • Progress: [%s]", progress_bar))
     end
     
     table.insert(success_message, "")
