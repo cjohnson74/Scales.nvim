@@ -157,9 +157,8 @@ function M.setup(opts)
             local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
             
             if pattern_name and pattern_name ~= '' then
-                -- Only start timing if it hasn't been started yet
-                if not stats.practice_log.timing_stats[pattern_name] or 
-                   not stats.practice_log.timing_stats[pattern_name].start_time then
+                -- Only start timing if there are no timing stats for this pattern
+                if not stats.practice_log.timing_stats[pattern_name] then
                     stats.start_timing(pattern_name)
                 end
             end

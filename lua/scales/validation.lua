@@ -120,9 +120,10 @@ function M.validate_practice()
         
         -- Record the successful validation
         local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
-        stats.record_validation(pattern_name, attempt_count)
+        local timing_stats = stats.record_validation(pattern_name, attempt_count)
         
-        ui.show_success_message(pattern_name, is_first_success)
+        -- Show success message with timing information
+        ui.show_success_message(pattern_name, is_first_success, timing_stats.last_time)
     else
         -- Show differences
         local diff_lines = {"❌ Your implementation doesn't match the template:"}
@@ -132,6 +133,19 @@ function M.validate_practice()
             table.insert(diff_lines, string.format("  Expected: %s", diff.template))
             table.insert(diff_lines, string.format("  Got:      %s", diff.practice))
             table.insert(diff_lines, "")
+        end
+        
+        -- Add timing information for failed attempts
+        local timing_stats = stats.practice_log.timing_stats[pattern_name]
+        if timing_stats and timing_stats.start_time then
+            local current_time = (vim.loop.hrtime() / 1e9) - timing_stats.start_time
+            table.insert(diff_lines, "")
+            table.insert(diff_lines, string.format("⏱️ Current session time: %.3f seconds", current_time))
+            
+            -- Show previous time if available
+            if timing_stats.last_time > 0 then
+                table.insert(diff_lines, string.format("⏱️ Previous successful time: %.3f seconds", timing_stats.last_time))
+            end
         end
         
         ui.show_popup(diff_lines, {
