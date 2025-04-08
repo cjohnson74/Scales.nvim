@@ -37,13 +37,7 @@ function M.validate_practice()
     
     -- Write the buffer to ensure we have the latest changes
     if vim.api.nvim_buf_get_option(current_buf, 'modified') then
-        local success = pcall(vim.api.nvim_buf_call, current_buf, function()
-            vim.cmd('write')
-        end)
-        if not success then
-            vim.notify("Failed to save file", vim.log.levels.ERROR)
-            return
-        end
+        vim.cmd('write')
     end
     
     local pattern_dir = vim.fn.fnamemodify(current_file, ':h')

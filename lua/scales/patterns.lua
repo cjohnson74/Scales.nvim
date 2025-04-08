@@ -99,12 +99,7 @@ end
 function M.generate_practice(pattern_name)
     -- Check if current buffer has unsaved changes
     if vim.bo.modified then
-        local choice = vim.fn.confirm("Current buffer has unsaved changes. Save?", "&Yes\n&No\n&Cancel", 1)
-        if choice == 1 then
-            vim.cmd('write')
-        elseif choice == 3 then
-            return
-        end
+        vim.cmd('write')
     end
 
     -- If no pattern specified, choose randomly
@@ -160,12 +155,7 @@ end
 function M.open_current_practice()
     -- Check if current buffer has unsaved changes
     if vim.bo.modified then
-        local choice = vim.fn.confirm("Current buffer has unsaved changes. Save?", "&Yes\n&No\n&Cancel", 1)
-        if choice == 1 then
-            vim.cmd('write')
-        elseif choice == 3 then
-            return
-        end
+        vim.cmd('write')
     end
 
     local practice_dir = M.config.practice_dir
@@ -430,13 +420,7 @@ function M.list_patterns()
                 
                 -- Check if current buffer has unsaved changes
                 if vim.bo.modified then
-                    local choice = vim.fn.confirm("Current buffer has unsaved changes. Save?", "&Yes\n&No\n&Cancel", 1)
-                    if choice == 1 then
-                        vim.cmd('write')
-                    elseif choice == 3 then
-                        vim.notify("Practice generation cancelled", vim.log.levels.INFO)
-                        return
-                    end
+                    vim.cmd('write')
                 end
                 
                 M.generate_practice(pattern_name)

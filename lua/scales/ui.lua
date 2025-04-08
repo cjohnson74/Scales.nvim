@@ -269,13 +269,7 @@ function M.show_patterns_menu()
                 
                 -- Check if current buffer has unsaved changes
                 if vim.bo.modified then
-                    local choice = vim.fn.confirm("Current buffer has unsaved changes. Save?", "&Yes\n&No\n&Cancel", 1)
-                    if choice == 1 then
-                        vim.cmd('write')
-                    elseif choice == 3 then
-                        vim.notify("Practice generation cancelled", vim.log.levels.INFO)
-                        return
-                    end
+                    vim.cmd('write')
                 end
                 
                 require('scales.core').generate_practice(pattern_name)
