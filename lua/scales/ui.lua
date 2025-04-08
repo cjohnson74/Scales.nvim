@@ -410,17 +410,19 @@ function M.show_success_message(pattern_name, is_first_validation)
         table.insert(success_message, string.format("Time taken: %s", format_time(timing_stats.last_time)))
         
         if timing_stats.best_time > 0 then
-            local improvement = 0
-            if timing_stats.last_time > 0 and timing_stats.best_time > 0 then
-                improvement = ((timing_stats.last_time - timing_stats.best_time) / timing_stats.last_time) * 100
-            end
-            local improvement_emoji = improvement > 0 and "📈" or "📉"
+            local time_diff = timing_stats.last_time - timing_stats.best_time
+            local time_diff_str = format_time(math.abs(time_diff))
             
             if timing_stats.best_time ~= timing_stats.last_time then
-                table.insert(success_message, string.format("Best time: %s (%s %.1f%%)", 
-                    format_time(timing_stats.best_time),
-                    improvement_emoji,
-                    improvement))
+                if time_diff > 0 then
+                    table.insert(success_message, string.format("Best time: %s (⏱️ %s faster)", 
+                        format_time(timing_stats.best_time),
+                        time_diff_str))
+                else
+                    table.insert(success_message, string.format("Best time: %s (⏱️ %s slower)", 
+                        format_time(timing_stats.best_time),
+                        time_diff_str))
+                end
             else
                 table.insert(success_message, string.format("🎉 New best time! %s", format_time(timing_stats.best_time)))
             end
