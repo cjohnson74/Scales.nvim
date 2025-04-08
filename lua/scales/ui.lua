@@ -461,13 +461,44 @@ function M.show_success_message(pattern_name, is_first_validation, current_time)
         table.insert(success_message, string.format("  • Total Practices: %d", total_practices))
         table.insert(success_message, string.format("  • First Attempt Success Rate: %.1f%%", success_rate))
         
-        -- Add progress bar for pattern mastery
+        -- Calculate progress based on achievement levels
         local level, emoji = stats.get_achievement_level(total_practices, first_attempt_successes)
         local progress_width = 20
-        local progress_filled = math.min(math.floor((total_practices / 100) * progress_width), progress_width)
+        local progress_filled = 0
+        
+        -- Calculate progress based on current level and next level requirements
+        if total_practices >= 100 and success_rate >= 80 then
+            -- Master level (100%)
+            progress_filled = progress_width
+        elseif total_practices >= 50 and success_rate >= 70 then
+            -- Expert level (75%)
+            progress_filled = math.floor(progress_width * 0.75)
+        elseif total_practices >= 25 and success_rate >= 60 then
+            -- Advanced level (50%)
+            progress_filled = math.floor(progress_width * 0.5)
+        elseif total_practices >= 10 and success_rate >= 50 then
+            -- Intermediate level (25%)
+            progress_filled = math.floor(progress_width * 0.25)
+        else
+            -- Beginner level (0-25%)
+            local progress = math.min(total_practices / 10, 1)  -- Progress toward intermediate
+            progress_filled = math.floor(progress_width * progress * 0.25)
+        end
+        
         local progress_bar = string.rep("█", progress_filled) .. string.rep("░", progress_width - progress_filled)
         table.insert(success_message, string.format("  • Mastery Level: %s %s", emoji, level))
         table.insert(success_message, string.format("  • Progress: [%s]", progress_bar))
+        
+        -- Add next level requirements
+        if level == "Beginner" then
+            table.insert(success_message, "  • Next Level: 10 practices with 50% first-attempt success")
+        elseif level == "Intermediate" then
+            table.insert(success_message, "  • Next Level: 25 practices with 60% first-attempt success")
+        elseif level == "Advanced" then
+            table.insert(success_message, "  • Next Level: 50 practices with 70% first-attempt success")
+        elseif level == "Expert" then
+            table.insert(success_message, "  • Next Level: 100 practices with 80% first-attempt success")
+        end
     end
     
     table.insert(success_message, "")
