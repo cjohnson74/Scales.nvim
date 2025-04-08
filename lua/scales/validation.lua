@@ -24,6 +24,16 @@ local function format_time(seconds)
     end
 end
 
+-- Helper function to strip comments and normalize whitespace
+local function process_line(line)
+    -- Remove comments and normalize in one pass
+    line = line:gsub("%s*#.*$", ""):gsub("^%s*#.*$", "")
+    -- Normalize whitespace while preserving indentation
+    local leading_ws = line:match("^(%s*)")
+    local content = line:gsub("%s*$", ""):gsub("%s+", " ")
+    return leading_ws .. content
+end
+
 -- Validate practice implementation
 function M.validate_practice()
     -- Get the current buffer
@@ -68,46 +78,21 @@ function M.validate_practice()
         return
     end
     
-    -- Filter out comments and empty lines
+    -- Process lines in parallel
     local template_lines = {}
     local practice_lines = {}
     
-    -- Helper function to strip comments from a line
-    local function strip_comments(line)
-        -- Remove inline comments
-        line = line:gsub("%s*#.*$", "")
-        -- Remove line comments
-        if line:match("^%s*#") then
-            return ""
-        end
-        return line
-    end
-
-    -- Helper function to normalize whitespace
-    local function normalize_whitespace(line)
-        -- Preserve leading whitespace (indentation)
-        local leading_ws = line:match("^(%s*)")
-        -- Remove trailing whitespace
-        local content = line:gsub("%s*$", "")
-        -- Normalize internal whitespace (multiple spaces to single space)
-        content = content:gsub("%s+", " ")
-        -- Combine preserved indentation with normalized content
-        return leading_ws .. content
-    end
-
     for _, line in ipairs(template_content) do
-        line = strip_comments(line)
-        line = normalize_whitespace(line)
-        if not line:match("^%s*$") then
-            table.insert(template_lines, line)
+        local processed = process_line(line)
+        if not processed:match("^%s*$") then
+            table.insert(template_lines, processed)
         end
     end
-
+    
     for _, line in ipairs(practice_content) do
-        line = strip_comments(line)
-        line = normalize_whitespace(line)
-        if not line:match("^%s*$") then
-            table.insert(practice_lines, line)
+        local processed = process_line(line)
+        if not processed:match("^%s*$") then
+            table.insert(practice_lines, processed)
         end
     end
     
