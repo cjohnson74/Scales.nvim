@@ -65,6 +65,24 @@ Most developers struggle with technical interviews because they're missing a cru
 - **Measurable Progress**: Track your improvement and build confidence
 - **Integrated Workflow**: Practice in your familiar development environment
 
+### 🎯 Why Neovim?
+- **Lightning Fast Practice**
+  - Open terminal and start practicing instantly
+  - No website loading or setup time
+  - Maximum reps in minimum time
+- **Keyboard-First Workflow**
+  - Execute commands at high speed
+  - Focus on coding, not clicking
+  - Build muscle memory for both patterns and editing
+- **Always Available**
+  - Practice anywhere with terminal access
+  - No internet required for core features
+  - Consistent experience across environments
+- **100% Free & Open Source**
+  - No subscription fees
+  - No premium features
+  - Community-driven development
+
 ## 📦 Installation
 
 ### Prerequisites
@@ -168,6 +186,57 @@ Earn badges and achievements as you practice:
 - **Pattern Mastery**: Master of [Pattern], Advanced in [Pattern], etc.
 - **Timing Achievements**: Speed Demon, Fast Learner, Consistent Performer
 - **Global Achievements**: Centurion, Halfway There, Pattern Scholar
+
+## 🔮 Future Features
+
+### Pattern Recognition Quiz
+- `:ScalesQuiz` command to test pattern identification
+- Uses HackerRank API to fetch real interview problems
+  - Problems filtered by difficulty and pattern
+  - Randomized selection to prevent memorization
+  - Time-limited challenges
+- Track accuracy and provide hints
+  - Pattern-specific hints
+  - Common mistake detection
+  - Progress tracking per pattern
+- Build pattern recognition skills
+  - Difficulty progression
+  - Pattern-specific achievements
+  - Performance analytics
+
+### Template Manipulation Quiz
+- Exercises for modifying templates to solve problems
+- Uses HackerRank API for validation
+  - Real problem constraints
+  - Comprehensive test cases
+  - Time/space complexity checks
+- Track and provide feedback on modifications
+  - Modification history
+  - Success rate tracking
+  - Common optimization paths
+- Learn pattern variations and applications
+  - Multiple solution approaches
+  - Optimization techniques
+  - Edge case handling
+
+### New Pattern Templates
+- Line Sweep algorithm
+- Segment Trees
+- More advanced competitive programming patterns
+  - Heavy-Light Decomposition
+  - Sparse Tables
+  - Fenwick Trees
+
+### Custom Pattern Support
+- Add your own patterns and templates
+  - Local pattern creation
+  - Custom validation rules
+  - Personal practice problems
+- Share patterns with the community
+  - Pattern marketplace for sharing templates
+  - Rate and review community patterns
+  - Search and filter patterns by difficulty/tags
+  - Import patterns directly from GitHub
 
 ## 🤝 Contributing
 
