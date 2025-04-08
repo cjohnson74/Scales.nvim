@@ -96,14 +96,16 @@ function M.end_timing(file_path)
     end
     
     -- Update best time if this is better
+    local is_new_best = false
     if stats.best_time == 0 or time_taken < stats.best_time then
         stats.best_time = time_taken
+        is_new_best = true
     end
     
-    -- Calculate improvement percentage
+    -- Calculate improvement in seconds
     local improvement = 0
-    if stats.last_time > 0 and stats.best_time > 0 then
-        improvement = ((stats.last_time - stats.best_time) / stats.last_time) * 100
+    if old_best > 0 and time_taken < old_best then
+        improvement = old_best - time_taken
     end
     
     -- Update pattern practice count with attempt weighting
@@ -117,7 +119,8 @@ function M.end_timing(file_path)
     return {
         last_time = stats.last_time,
         best_time = stats.best_time,
-        improvement = improvement
+        improvement = improvement,
+        is_new_best = is_new_best
     }
 end
 

@@ -407,24 +407,30 @@ function M.show_success_message(pattern_name, is_first_validation)
     -- Add timing information if available
     local timing_stats = stats.practice_log.timing_stats[pattern_name]
     if timing_stats and timing_stats.last_time > 0 then
+        -- Add current attempt time
         table.insert(success_message, string.format("Time taken: %s", format_time(timing_stats.last_time)))
         
+        -- Add best time with comparison
         if timing_stats.best_time > 0 then
-            local time_diff = timing_stats.last_time - timing_stats.best_time
-            local time_diff_str = format_time(math.abs(time_diff))
+            -- Calculate time difference
+            local time_diff = math.abs(timing_stats.last_time - timing_stats.best_time)
+            local time_diff_str = format_time(time_diff)
             
-            if timing_stats.best_time ~= timing_stats.last_time then
-                if time_diff > 0 then
-                    table.insert(success_message, string.format("Best time: %s (⏱️ %s faster)", 
+            if timing_stats.last_time == timing_stats.best_time then
+                table.insert(success_message, string.format("Best time: %s (🎉 New best time!)", 
+                    format_time(timing_stats.best_time)))
+            else
+                if timing_stats.last_time > timing_stats.best_time then
+                    -- Current attempt is slower than best
+                    table.insert(success_message, string.format("Best time: %s (⏱️ %s to beat)", 
                         format_time(timing_stats.best_time),
                         time_diff_str))
                 else
-                    table.insert(success_message, string.format("Best time: %s (⏱️ %s slower)", 
+                    -- Current attempt is faster than best (shouldn't happen, but just in case)
+                    table.insert(success_message, string.format("Best time: %s (⏱️ %s improvement)", 
                         format_time(timing_stats.best_time),
                         time_diff_str))
                 end
-            else
-                table.insert(success_message, string.format("🎉 New best time! %s", format_time(timing_stats.best_time)))
             end
         end
     end
