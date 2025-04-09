@@ -153,6 +153,13 @@ function M.setup(opts)
                 return
             end
             
+            -- Skip if this is a floating window
+            local win = vim.api.nvim_get_current_win()
+            local win_config = vim.api.nvim_win_get_config(win)
+            if win_config.relative ~= '' then
+                return
+            end
+            
             local pattern_dir = vim.fn.fnamemodify(current_file, ':h')
             local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
             
@@ -170,6 +177,13 @@ function M.setup(opts)
         callback = function()
             local current_file = vim.fn.expand('%:p')
             if not current_file:match('practice%.py$') then
+                return
+            end
+            
+            -- Skip if the window we're leaving to is a floating window
+            local next_win = vim.api.nvim_get_current_win()
+            local next_win_config = vim.api.nvim_win_get_config(next_win)
+            if next_win_config.relative ~= '' then
                 return
             end
             
