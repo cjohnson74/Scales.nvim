@@ -34,8 +34,6 @@ function M.start_timing(pattern_name)
             first_attempt_successes = 0,
             previous_time = 0
         }
-    else
-        M.practice_log.timing_stats[pattern_name].start_time = vim.loop.hrtime() / 1e9  -- Convert to seconds immediately
     end
 end
 
