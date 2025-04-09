@@ -381,18 +381,18 @@ end
 
 -- Show practice progress
 function M.show_progress()
-    local stats = require("scales.stats")
-    local patterns = require("scales.patterns").patterns
+    local patterns = require('scales.patterns')
+    local stats = require('scales.stats')
     
     -- Calculate overall progress
-    local total_patterns = vim.tbl_count(patterns)
+    local total_patterns = vim.tbl_count(patterns.patterns)
     local patterns_mastered = 0
     local total_attempts = 0
     local successful_attempts = 0
     local pattern_progress = {}
     
     -- Calculate progress for each pattern
-    for pattern_name, _ in pairs(patterns) do
+    for pattern_name, _ in pairs(patterns.patterns) do
         local timing_stats = stats.practice_log.timing_stats[pattern_name] or {}
         local total_practices = timing_stats.total_practices or 0
         local first_attempt_successes = timing_stats.first_attempt_successes or 0
@@ -456,9 +456,13 @@ function M.show_progress()
             timing_stats = data.timing_stats
         })
     end
-    table.sort(sorted_patterns, function(a, b) return a.progress > b.progress end)
     
-    -- Add pattern progress with progress bars and detailed stats
+    table.sort(sorted_patterns, function(a, b)
+        return a.progress > b.progress
+    end)
+    
+    -- Add pattern progress
+    local progress_width = 30
     for _, item in ipairs(sorted_patterns) do
         local pattern_name = item.name
         local data = pattern_progress[pattern_name]
