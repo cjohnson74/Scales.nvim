@@ -8,7 +8,8 @@ M.practice_log = {
     patterns_practiced = {},
     timing_stats = {},
     attempt_stats = {},  -- Track attempts per file
-    previous_times = {}  -- Track previous attempt times per pattern
+    previous_times = {},  -- Track previous attempt times per pattern
+    validated_practices = {}
 }
 
 -- Ensure stats directory exists
@@ -26,6 +27,7 @@ end
 -- Start timing a practice session
 function M.start_timing(pattern_name)
     if not M.practice_log.timing_stats[pattern_name] then
+        -- Initialize with default values, preserving any existing stats
         M.practice_log.timing_stats[pattern_name] = {
             start_time = vim.loop.hrtime() / 1e9,  -- Convert to seconds immediately
             last_time = 0,
@@ -34,6 +36,9 @@ function M.start_timing(pattern_name)
             first_attempt_successes = 0,
             previous_time = 0
         }
+    else
+        -- Just update the start time for existing pattern
+        M.practice_log.timing_stats[pattern_name].start_time = vim.loop.hrtime() / 1e9
     end
 end
 
@@ -63,64 +68,46 @@ function M.get_attempt_count(file_path)
     return M.practice_log.attempt_stats[file_path] or 0
 end
 
--- End timing and update statistics
-function M.end_timing(file_path)
-    local pattern_dir = vim.fn.fnamemodify(file_path, ':h')
-    local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
-    local attempt_count = M.get_attempt_count(file_path)
-    
+-- End timing and record the practice session
+function M.end_timing(pattern_name, success)
     if not M.practice_log.timing_stats[pattern_name] then
-        M.practice_log.timing_stats[pattern_name] = {
-            start_time = vim.loop.hrtime() / 1e9,  -- Convert to seconds immediately
-            last_time = 0,
-            best_time = 0,
-            total_practices = 0,
-            first_attempt_successes = 0,
-            previous_time = 0
-        }
+        return
     end
-    
+
     local stats = M.practice_log.timing_stats[pattern_name]
-    local end_time = vim.loop.hrtime() / 1e9  -- Convert to seconds immediately
-    local time_taken = end_time - stats.start_time
-    
-    -- Store previous time before updating
-    local previous_time = stats.last_time or 0
-    stats.previous_time = previous_time
-    M.practice_log.previous_times[pattern_name] = previous_time
-    
-    -- Update statistics
-    local old_best = stats.best_time
-    stats.last_time = time_taken
+    local end_time = vim.loop.hrtime() / 1e9
+    local duration = end_time - stats.start_time
+
+    -- Update timing stats
+    stats.last_time = duration
+    stats.previous_time = stats.last_time
+
+    -- Only update best time if this is better than previous best
+    if stats.best_time == 0 or duration < stats.best_time then
+        stats.best_time = duration
+    end
+
+    -- Increment total practices
     stats.total_practices = stats.total_practices + 1
-    
-    -- Track first-attempt successes
-    if attempt_count == 1 then
+
+    -- Update first attempt success if this was a first attempt
+    if success and not M.practice_log.validated_practices[pattern_name] then
         stats.first_attempt_successes = stats.first_attempt_successes + 1
     end
-    
-    -- Update best time if this is better
-    local is_new_best = false
-    if stats.best_time == 0 then
-        stats.best_time = time_taken
-        is_new_best = true
-    elseif time_taken < stats.best_time then
-        stats.best_time = time_taken
-        is_new_best = true
+
+    -- Mark as validated if successful
+    if success then
+        M.practice_log.validated_practices[pattern_name] = true
     end
-    
+
     -- Calculate improvement
     local improvement = 0
-    if is_new_best and old_best > 0 then
-        -- If it's a new best, compare with previous best
-        improvement = old_best - time_taken
-    elseif previous_time > 0 then
-        -- Otherwise compare with previous attempt
-        improvement = previous_time - time_taken
+    if stats.best_time > 0 then
+        improvement = stats.best_time - duration
     end
     
     -- Update pattern practice count with attempt weighting
-    local attempt_weight = 1.0 / attempt_count  -- Reduce weight based on attempts
+    local attempt_weight = 1.0 / (M.practice_log.attempt_stats[pattern_name] or 1)  -- Reduce weight based on attempts
     M.practice_log.patterns_practiced[pattern_name] = (M.practice_log.patterns_practiced[pattern_name] or 0) + attempt_weight
     M.practice_log.total_sessions = M.practice_log.total_sessions + attempt_weight
     
@@ -130,9 +117,9 @@ function M.end_timing(file_path)
     return {
         last_time = stats.last_time,
         best_time = stats.best_time,
-        previous_time = previous_time,
+        previous_time = stats.previous_time,
         improvement = improvement,
-        is_new_best = is_new_best
+        is_new_best = stats.best_time == duration
     }
 end
 
@@ -150,7 +137,8 @@ function M.load_stats()
         patterns_practiced = {},
         timing_stats = {},
         attempt_stats = {},
-        previous_times = {}
+        previous_times = {},
+        validated_practices = {}
     }
     
     -- Check if file exists and is readable
@@ -202,6 +190,17 @@ function M.load_stats()
                 end
             end
             
+            if type(data.validated_practices) == "table" then
+                if #data.validated_practices > 0 then
+                    -- Convert array to table
+                    local new_validated_practices = {}
+                    for _, practice in ipairs(data.validated_practices) do
+                        new_validated_practices[practice] = true
+                    end
+                    data.validated_practices = new_validated_practices
+                end
+            end
+            
             -- Merge with default values
             M.practice_log = vim.tbl_deep_extend("force", M.practice_log, data)
         else
@@ -227,7 +226,8 @@ function M.save_stats()
         patterns_practiced = M.practice_log.patterns_practiced or {},
         timing_stats = M.practice_log.timing_stats or {},
         attempt_stats = M.practice_log.attempt_stats or {},
-        previous_times = M.practice_log.previous_times or {}
+        previous_times = M.practice_log.previous_times or {},
+        validated_practices = M.practice_log.validated_practices or {}
     }
     
     local success, err = pcall(function()
@@ -287,18 +287,27 @@ function M.reset_current_timing()
         return
     end
     
-    -- Reset timing stats for this pattern
+    -- Only reset the current session's timing stats
     if M.practice_log.timing_stats[pattern_name] then
+        -- Preserve historical stats
+        local historical_stats = {
+            total_practices = M.practice_log.timing_stats[pattern_name].total_practices,
+            first_attempt_successes = M.practice_log.timing_stats[pattern_name].first_attempt_successes,
+            best_time = M.practice_log.timing_stats[pattern_name].best_time
+        }
+        
+        -- Reset only the current session's timing
         M.practice_log.timing_stats[pattern_name] = {
             start_time = vim.loop.hrtime() / 1e9,  -- Convert to seconds immediately
             last_time = 0,
-            best_time = 0,
-            total_practices = 0,
-            first_attempt_successes = 0,
+            best_time = historical_stats.best_time,  -- Keep historical best time
+            total_practices = historical_stats.total_practices,  -- Keep total practices
+            first_attempt_successes = historical_stats.first_attempt_successes,  -- Keep first attempt successes
             previous_time = 0
         }
+        
         M.save_stats()
-        vim.notify("Reset timing for " .. pattern_name, vim.log.levels.INFO)
+        vim.notify("Reset current session for " .. pattern_name, vim.log.levels.INFO)
     end
 end
 
