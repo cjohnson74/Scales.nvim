@@ -395,7 +395,7 @@ function M.show_progress()
         local attempts = stats.practice_log.attempt_stats[pattern_name] or 0
         local successes = stats.practice_log.validated_practices[pattern_name] and 1 or 0
         
-        -- Calculate progress percentage
+        -- Calculate progress percentage based on first-attempt successes
         local progress = 0
         if total_practices > 0 then
             progress = math.floor((first_attempt_successes / total_practices) * 100)
@@ -415,6 +415,8 @@ function M.show_progress()
             progress = progress,
             attempts = attempts,
             successes = successes,
+            total_practices = total_practices,
+            first_attempt_successes = first_attempt_successes,
             timing_stats = timing_stats
         }
     end
@@ -445,68 +447,73 @@ function M.show_progress()
             progress = data.progress,
             attempts = data.attempts,
             successes = data.successes,
+            total_practices = data.total_practices,
+            first_attempt_successes = data.first_attempt_successes,
             timing_stats = data.timing_stats
         })
     end
     table.sort(sorted_patterns, function(a, b) return a.progress > b.progress end)
     
     -- Add pattern progress with progress bars and detailed stats
-    for _, pattern in ipairs(sorted_patterns) do
-        local display_name = require("scales.patterns").get_display_name(pattern.name)
-        local progress_width = 30  -- Increased width for progress bar
-        local progress_filled = math.floor((pattern.progress / 100) * progress_width)
-        local progress_bar = string.rep("█", progress_filled) .. string.rep("░", progress_width - progress_filled)
+    for _, item in ipairs(sorted_patterns) do
+        local pattern_name = item.name
+        local data = pattern_progress[pattern_name]
+        local display_name = patterns.get_display_name(pattern_name)
+        local progress = data.progress
+        local progress_filled = math.floor(progress * progress_width / 100)
+        local progress_empty = progress_width - progress_filled
         
-        -- Get achievement level and emoji
-        local level, emoji = stats.get_achievement_level(
-            pattern.timing_stats.total_practices or 0,
-            pattern.timing_stats.first_attempt_successes or 0
+        -- Get achievement level
+        local level_name, level_emoji = stats.get_achievement_level(
+            data.total_practices,
+            data.first_attempt_successes
         )
         
-        -- Add pattern header with progress bar
-        table.insert(content, string.format("  %s %s: [%s] %d%% (%d/%d)", 
-            emoji,
+        -- Add pattern progress line
+        table.insert(content, string.format("  %s %s: [%s%s] %d%% (%d/%d)",
+            level_emoji,
             display_name,
-            progress_bar,
-            pattern.progress,
-            pattern.successes,
-            pattern.attempts
+            string.rep("█", progress_filled),
+            string.rep("░", progress_empty),
+            progress,
+            data.first_attempt_successes,
+            data.total_practices
         ))
         
         -- Add detailed timing stats if available
-        if pattern.timing_stats and pattern.timing_stats.total_practices and pattern.timing_stats.total_practices > 0 then
+        if data.timing_stats and data.timing_stats.total_practices and data.timing_stats.total_practices > 0 then
             -- Add practice count and success rate
-            local success_rate = (pattern.timing_stats.first_attempt_successes / pattern.timing_stats.total_practices) * 100
+            local success_rate = (data.first_attempt_successes / data.total_practices) * 100
             table.insert(content, string.format("    • Practices: %d (%.1f%% first-attempt success)", 
-                pattern.timing_stats.total_practices,
+                data.total_practices,
                 success_rate
             ))
             
             -- Add timing information
-            if pattern.timing_stats.best_time and pattern.timing_stats.best_time > 0 then
-                table.insert(content, string.format("    • Best Time: %.3f seconds", pattern.timing_stats.best_time))
+            if data.timing_stats.best_time and data.timing_stats.best_time > 0 then
+                table.insert(content, string.format("    • Best Time: %.3f seconds", data.timing_stats.best_time))
             end
-            if pattern.timing_stats.last_time and pattern.timing_stats.last_time > 0 then
-                table.insert(content, string.format("    • Last Time: %.3f seconds", pattern.timing_stats.last_time))
+            if data.timing_stats.last_time and data.timing_stats.last_time > 0 then
+                table.insert(content, string.format("    • Last Time: %.3f seconds", data.timing_stats.last_time))
             end
             
             -- Add achievement level
-            table.insert(content, string.format("    • Level: %s %s", emoji, level))
+            table.insert(content, string.format("    • Level: %s %s", level_emoji, level_name))
             
             -- Add next level requirements
-            if level == "Hatchling" then
+            if level_name == "Hatchling" then
                 table.insert(content, "    • Next: 10 practices with 50% first-attempt success → Soaring Eagle")
-            elseif level == "Soaring Eagle" then
+            elseif level_name == "Soaring Eagle" then
                 table.insert(content, "    • Next: 25 practices with 60% first-attempt success → Rising Phoenix")
-            elseif level == "Rising Phoenix" then
+            elseif level_name == "Rising Phoenix" then
                 table.insert(content, "    • Next: 50 practices with 70% first-attempt success → Noble Lion")
-            elseif level == "Noble Lion" then
+            elseif level_name == "Noble Lion" then
                 table.insert(content, "    • Next: 100 practices with 80% first-attempt success → Mystic Unicorn")
-            elseif level == "Mystic Unicorn" then
+            elseif level_name == "Mystic Unicorn" then
                 table.insert(content, "    • Next: 150 practices with 85% first-attempt success → Elder Dragon")
-            elseif level == "Elder Dragon" then
+            elseif level_name == "Elder Dragon" then
                 table.insert(content, "    • Next: 200 practices with 90% first-attempt success → Celestial Dragon")
-            elseif level == "Celestial Dragon" then
+            elseif level_name == "Celestial Dragon" then
                 table.insert(content, "    • ⭐ You have reached the highest level! ⭐")
             end
         end
@@ -640,27 +647,27 @@ function M.show_success_message(pattern_name, is_first_validation, current_time)
         table.insert(success_message, string.format("    • First Attempt Success Rate: %.1f%%", success_rate))
         
         -- Get current level and calculate progress toward next level
-        local level, emoji = stats.get_achievement_level(total_practices, first_attempt_successes)
+        local level_name, level_emoji = stats.get_achievement_level(total_practices, first_attempt_successes)
         local progress_filled, progress_width = calculate_progress(total_practices, first_attempt_successes)
         
         local progress_bar = string.rep("█", progress_filled) .. string.rep("░", progress_width - progress_filled)
-        table.insert(success_message, string.format("    • Mastery Level: %s %s", emoji, level))
+        table.insert(success_message, string.format("    • Mastery Level: %s %s", level_emoji, level_name))
         table.insert(success_message, string.format("    • Progress: [%s]", progress_bar))
         
         -- Add next level requirements with fancy arrows
-        if level == "Hatchling" then
+        if level_name == "Hatchling" then
             table.insert(success_message, "    • Next Level: 10 practices with 50% first-attempt success → Soaring Eagle")
-        elseif level == "Soaring Eagle" then
+        elseif level_name == "Soaring Eagle" then
             table.insert(success_message, "    • Next Level: 25 practices with 60% first-attempt success → Rising Phoenix")
-        elseif level == "Rising Phoenix" then
+        elseif level_name == "Rising Phoenix" then
             table.insert(success_message, "    • Next Level: 50 practices with 70% first-attempt success → Noble Lion")
-        elseif level == "Noble Lion" then
+        elseif level_name == "Noble Lion" then
             table.insert(success_message, "    • Next Level: 100 practices with 80% first-attempt success → Mystic Unicorn")
-        elseif level == "Mystic Unicorn" then
+        elseif level_name == "Mystic Unicorn" then
             table.insert(success_message, "    • Next Level: 150 practices with 85% first-attempt success → Elder Dragon")
-        elseif level == "Elder Dragon" then
+        elseif level_name == "Elder Dragon" then
             table.insert(success_message, "    • Next Level: 200 practices with 90% first-attempt success → Celestial Dragon")
-        elseif level == "Celestial Dragon" then
+        elseif level_name == "Celestial Dragon" then
             table.insert(success_message, "    • ⭐ You have reached the highest level! ⭐")
             table.insert(success_message, "    • 🎉 Congratulations on achieving mastery! 🎉")
             table.insert(success_message, "    • ✨ Your dedication has been rewarded ✨")
