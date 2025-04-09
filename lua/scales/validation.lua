@@ -5,14 +5,12 @@ M.config = {}  -- Will be set by core.lua
 local stats = require('scales.stats')
 local ui = require('scales.ui')
 
--- Track validated practices
-local validated_practices = {}  -- Only tracks successful validations
+-- Track attempt counts
 local attempt_counts = {}  -- Track attempts per file
 
 -- Reset attempt counts for a file
 function M.reset_attempts(file_path)
     attempt_counts[file_path] = nil
-    validated_practices[file_path] = nil
 end
 
 -- Format time in a human-readable way
@@ -123,9 +121,8 @@ function M.validate_practice()
     
     -- Show results
     if #differences == 0 then
-        -- Track this attempt only if it was successful
-        local is_first_success = not validated_practices[current_file]
-        validated_practices[current_file] = true
+        -- Track this attempt
+        local is_first_success = current_attempt == 1
         
         -- Record the successful validation with the current attempt count
         local timing_stats = stats.record_validation(pattern_name, current_attempt)

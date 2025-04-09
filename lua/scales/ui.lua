@@ -380,20 +380,40 @@ function M.show_progress()
     table.insert(progress_contents, "Pattern Statistics:")
     table.insert(progress_contents, "════════════════════════")
     
-    -- Sort patterns by practice count
-    local sorted_patterns = {}
+    -- Get all patterns that have either practice counts or timing stats
+    local all_patterns = {}
     for pattern_name, practice_count in pairs(progress.patterns_practiced or {}) do
-        table.insert(sorted_patterns, {
+        table.insert(all_patterns, {
             name = pattern_name,
             count = practice_count
         })
     end
     
-    table.sort(sorted_patterns, function(a, b)
+    -- Add patterns that only have timing stats
+    for pattern_name, timing_stats in pairs(progress.timing_stats or {}) do
+        if timing_stats.total_practices and timing_stats.total_practices > 0 then
+            local found = false
+            for _, pattern in ipairs(all_patterns) do
+                if pattern.name == pattern_name then
+                    found = true
+                    break
+                end
+            end
+            if not found then
+                table.insert(all_patterns, {
+                    name = pattern_name,
+                    count = timing_stats.total_practices
+                })
+            end
+        end
+    end
+    
+    -- Sort patterns by practice count
+    table.sort(all_patterns, function(a, b)
         return a.count > b.count
     end)
     
-    for _, pattern in ipairs(sorted_patterns) do
+    for _, pattern in ipairs(all_patterns) do
         local pattern_name = pattern.name
         local pattern_stats = (progress.timing_stats or {})[pattern_name] or {}
         local level, emoji = stats.get_achievement_level(
