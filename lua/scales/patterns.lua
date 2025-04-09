@@ -559,4 +559,33 @@ function M.show_about(pattern_name)
     })
 end
 
+-- Pattern name mapping
+local pattern_name_map = {
+    ["1_binary_search"] = "Binary Search",
+    ["2_two_pointers_same_directions"] = "Two Pointers (Same)",
+    ["2_two_pointers_opposite_directions"] = "Two Pointers (Opposite)",
+    ["3_sliding_window_fixed_size"] = "Sliding Window (Fixed)",
+    ["3_sliding_window_flexible_longest"] = "Sliding Window (Longest)",
+    ["3_sliding_window_flexible_shortest"] = "Sliding Window (Shortest)",
+    ["4_prefix_sum"] = "Prefix Sums",
+    ["5_dfs_on_tree"] = "DFS (Tree)",
+    ["5_dfs_on_graph"] = "DFS (Graph)",
+    ["6_backtracking_basic"] = "Backtracking (Basic)",
+    ["6_backtracking_aggregation"] = "Backtracking (Aggregate)",
+    ["7_bfs_on_tree"] = "BFS (Tree)",
+    ["7_bfs_on_graph"] = "BFS (Graph)",
+    ["7_bfs_on_matrix"] = "BFS (Matrix)",
+    ["8_topological_sort"] = "Topological Sort",
+    ["90_union_find"] = "Union Find",
+    ["90_dp_top_down"] = "DP (Top-Down)",
+    ["dp_bottom_up"] = "DP (Bottom-Up)",
+    ["91_trie"] = "Trie",
+    ["92_mono_stack"] = "Monotonic Stack"
+}
+
+-- Get display name for a pattern
+function M.get_display_name(pattern_name)
+    return pattern_name_map[pattern_name] or pattern_name
+end
+
 return M 
