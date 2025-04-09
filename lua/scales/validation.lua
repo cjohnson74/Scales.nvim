@@ -9,6 +9,12 @@ local ui = require('scales.ui')
 local validated_practices = {}  -- Only tracks successful validations
 local attempt_counts = {}  -- Track attempts per file
 
+-- Reset attempt counts for a file
+function M.reset_attempts(file_path)
+    attempt_counts[file_path] = nil
+    validated_practices[file_path] = nil
+end
+
 -- Format time in a human-readable way
 local function format_time(seconds)
     if not seconds or seconds <= 0 then

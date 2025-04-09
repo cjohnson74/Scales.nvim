@@ -184,6 +184,9 @@ function M.reset_practice()
     -- Reset timing for this practice
     stats.reset_current_timing()
     
+    -- Reset attempt counts
+    validation.reset_attempts(current_file)
+    
     -- Open the reset file
     vim.cmd('edit ' .. current_file)
 end
