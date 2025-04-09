@@ -344,7 +344,9 @@ function M.record_validation(pattern_name, attempt_count)
     return {
         last_time = stats.last_time,
         best_time = stats.best_time,
-        previous_time = previous_time
+        previous_time = previous_time,
+        total_practices = stats.total_practices,
+        first_attempt_successes = stats.first_attempt_successes
     }
 end
 

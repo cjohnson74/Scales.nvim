@@ -450,7 +450,7 @@ function M.show_success_message(pattern_name, is_first_validation, current_time)
                     improvement_str))
             end
         end
-
+        
         -- Add practice progress
         local total_practices = timing_stats.total_practices or 0
         local first_attempt_successes = timing_stats.first_attempt_successes or 0

@@ -7,6 +7,7 @@ local ui = require('scales.ui')
 
 -- Track validated practices
 local validated_practices = {}  -- Only tracks successful validations
+local attempt_counts = {}  -- Track attempts per file
 
 -- Format time in a human-readable way
 local function format_time(seconds)
@@ -61,6 +62,10 @@ function M.validate_practice()
     -- Get pattern name for stats
     local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
     
+    -- Increment attempt count for this file
+    attempt_counts[current_file] = (attempt_counts[current_file] or 0) + 1
+    local current_attempt = attempt_counts[current_file]
+    
     -- Read template content
     local template_content = vim.fn.readfile(template_file)
     if not template_content then
@@ -113,14 +118,11 @@ function M.validate_practice()
     -- Show results
     if #differences == 0 then
         -- Track this attempt only if it was successful
-        local attempt_count = stats.track_attempt(current_file)
+        local is_first_success = not validated_practices[current_file]
+        validated_practices[current_file] = true
         
-        -- Check if this is the first successful validation
-        local is_first_success = attempt_count == 1
-        
-        -- Record the successful validation without resetting timing
-        local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
-        local timing_stats = stats.record_validation(pattern_name, attempt_count)
+        -- Record the successful validation with the current attempt count
+        local timing_stats = stats.record_validation(pattern_name, current_attempt)
         
         -- Show success message with timing information
         ui.show_success_message(pattern_name, is_first_success, timing_stats.last_time)
