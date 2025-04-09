@@ -310,7 +310,7 @@ function M.record_validation(pattern_name, attempt_count)
             last_time = 0,
             best_time = 0,
             total_practices = 0,
-            first_attempt_successes = 0,
+            first_attempt_successes = attempt_count == 1 and 1 or 0,  -- Initialize based on attempt count
             previous_time = 0
         }
     end
