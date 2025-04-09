@@ -2,6 +2,10 @@ local M = {}
 
 M.config = {}  -- Will be set by core.lua
 
+-- Import required modules
+local patterns = require('scales.patterns')
+local stats = require('scales.stats')
+
 -- Track open windows for cleanup
 local open_windows = {}
 
