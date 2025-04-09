@@ -328,10 +328,9 @@ function M.record_validation(pattern_name, attempt_count)
     stats.total_practices = (stats.total_practices or 0) + 1
     
     -- Track first-attempt successes
-    -- Only count as first attempt success if this is the first successful validation
-    -- and it was completed on the first attempt
-    if attempt_count == 1 and stats.total_practices == 1 then
-        stats.first_attempt_successes = 1
+    -- Count as first attempt success if this is the first attempt for this practice session
+    if attempt_count == 1 then
+        stats.first_attempt_successes = (stats.first_attempt_successes or 0) + 1
     end
     
     -- Update best time if this is better

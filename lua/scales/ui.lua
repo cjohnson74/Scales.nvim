@@ -481,8 +481,11 @@ function M.show_success_message(pattern_name, is_first_validation, current_time)
             progress_filled = math.floor(progress_width * 0.25)
         else
             -- Beginner level (0-25%)
-            local progress = math.min(total_practices / 10, 1)  -- Progress toward intermediate
-            progress_filled = math.floor(progress_width * progress * 0.25)
+            -- Calculate progress as a combination of practices and success rate
+            local practice_progress = math.min(total_practices / 10, 1)  -- Progress toward intermediate
+            local success_progress = success_rate / 50  -- Progress toward 50% success rate
+            local combined_progress = (practice_progress + success_progress) / 2
+            progress_filled = math.floor(progress_width * combined_progress * 0.25)
         end
         
         local progress_bar = string.rep("█", progress_filled) .. string.rep("░", progress_width - progress_filled)
