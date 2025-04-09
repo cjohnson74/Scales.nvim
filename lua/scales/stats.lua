@@ -80,7 +80,11 @@ function M.end_timing(pattern_name, success)
 
     -- Update timing stats
     stats.last_time = duration
-    stats.previous_time = stats.last_time
+
+    -- Only update previous time if this was a successful validation
+    if success then
+        stats.previous_time = stats.last_time
+    end
 
     -- Only update best time if this is better than previous best
     if stats.best_time == 0 or duration < stats.best_time then
