@@ -291,39 +291,69 @@ function M.show_practice_details(practice_info)
     M.create_float(details)
 end
 
--- Helper function to calculate progress bar
+-- Helper function to calculate progress
 local function calculate_progress(total_practices, first_attempt_successes)
     local success_rate = total_practices > 0 and (first_attempt_successes / total_practices) * 100 or 0
     local progress_width = 20
     local progress_filled = 0
     
-    if total_practices >= 100 and success_rate >= 80 then
-        -- Master level - show full progress
-        progress_filled = progress_width
-    elseif total_practices >= 50 and success_rate >= 70 then
-        -- Expert level - progress toward Master (100 practices, 80% success)
-        local progress_toward_master = math.min((total_practices - 50) / 50, 1)  -- Progress from 50 to 100 practices
-        local success_progress = math.min((success_rate - 70) / 10, 1)  -- Progress from 70% to 80% success rate
-        local combined_progress = (progress_toward_master + success_progress) / 2
-        progress_filled = math.floor(progress_width * combined_progress)
-    elseif total_practices >= 25 and success_rate >= 60 then
-        -- Advanced level - progress toward Expert (50 practices, 70% success)
-        local progress_toward_expert = math.min((total_practices - 25) / 25, 1)  -- Progress from 25 to 50 practices
-        local success_progress = math.min((success_rate - 60) / 10, 1)  -- Progress from 60% to 70% success rate
-        local combined_progress = (progress_toward_expert + success_progress) / 2
-        progress_filled = math.floor(progress_width * combined_progress)
-    elseif total_practices >= 10 and success_rate >= 50 then
-        -- Intermediate level - progress toward Advanced (25 practices, 60% success)
-        local progress_toward_advanced = math.min((total_practices - 10) / 15, 1)  -- Progress from 10 to 25 practices
-        local success_progress = math.min((success_rate - 50) / 10, 1)  -- Progress from 50% to 60% success rate
-        local combined_progress = (progress_toward_advanced + success_progress) / 2
-        progress_filled = math.floor(progress_width * combined_progress)
-    else
-        -- Beginner level - progress toward Intermediate (10 practices, 50% success)
-        local practice_progress = math.min(total_practices / 10, 1)  -- Progress toward 10 practices
-        local success_progress = math.min(success_rate / 50, 1)  -- Progress toward 50% success rate
-        local combined_progress = (practice_progress + success_progress) / 2
-        progress_filled = math.floor(progress_width * combined_progress)
+    -- Define level requirements and progress calculations
+    local levels = {
+        {
+            name = "Master",
+            min_practices = 100,
+            min_success_rate = 80,
+            progress_func = function() return progress_width end
+        },
+        {
+            name = "Expert",
+            min_practices = 50,
+            min_success_rate = 70,
+            progress_func = function(practices)
+                return math.floor(progress_width * math.min((practices - 50) / 50, 1))
+            end
+        },
+        {
+            name = "Advanced",
+            min_practices = 25,
+            min_success_rate = 60,
+            progress_func = function(practices)
+                return math.floor(progress_width * math.min((practices - 25) / 25, 1))
+            end
+        },
+        {
+            name = "Intermediate",
+            min_practices = 10,
+            min_success_rate = 50,
+            progress_func = function(practices)
+                return math.floor(progress_width * math.min((practices - 10) / 15, 1))
+            end
+        },
+        {
+            name = "Beginner",
+            min_practices = 0,
+            min_success_rate = 0,
+            progress_func = function(practices)
+                return math.floor(progress_width * math.min(practices / 10, 1))
+            end
+        }
+    }
+    
+    -- Find current level
+    local current_level = levels[#levels]  -- Default to Beginner
+    for _, level in ipairs(levels) do
+        if total_practices >= level.min_practices and success_rate >= level.min_success_rate then
+            current_level = level
+            break
+        end
+    end
+    
+    -- Calculate progress for current level
+    progress_filled = current_level.progress_func(total_practices)
+    
+    -- Ensure at least one block is shown if there's any progress
+    if progress_filled == 0 and total_practices > 0 then
+        progress_filled = 1
     end
     
     return progress_filled, progress_width
