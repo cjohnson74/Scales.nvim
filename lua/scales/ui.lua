@@ -427,7 +427,7 @@ function M.show_success_message(pattern_name, is_first_validation, current_time)
                         string.format("%.3f seconds", timing_stats.best_time),
                         time_diff_str))
                 else
-                    -- Current attempt is faster than best (shouldn't happen, but just in case)
+                    -- Current attempt is faster than best
                     table.insert(success_message, string.format("Best time: %s (⏱️ %s improvement)", 
                         string.format("%.3f seconds", timing_stats.best_time),
                         time_diff_str))

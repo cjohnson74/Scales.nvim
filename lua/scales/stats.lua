@@ -305,7 +305,14 @@ end
 -- Record successful validation without ending the timer
 function M.record_validation(pattern_name, attempt_count)
     if not M.practice_log.timing_stats[pattern_name] then
-        return
+        M.practice_log.timing_stats[pattern_name] = {
+            start_time = vim.loop.hrtime() / 1e9,  -- Convert to seconds immediately
+            last_time = 0,
+            best_time = 0,
+            total_practices = 0,
+            first_attempt_successes = 0,
+            previous_time = 0
+        }
     end
     
     local stats = M.practice_log.timing_stats[pattern_name]
@@ -318,11 +325,11 @@ function M.record_validation(pattern_name, attempt_count)
     
     -- Update statistics
     stats.last_time = current_time
-    stats.total_practices = stats.total_practices + 1
+    stats.total_practices = (stats.total_practices or 0) + 1
     
     -- Track first-attempt successes
     if attempt_count == 1 then
-        stats.first_attempt_successes = stats.first_attempt_successes + 1
+        stats.first_attempt_successes = (stats.first_attempt_successes or 0) + 1
     end
     
     -- Update best time if this is better

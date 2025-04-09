@@ -61,9 +61,6 @@ function M.validate_practice()
     -- Get pattern name for stats
     local pattern_name = vim.fn.fnamemodify(pattern_dir, ':t')
     
-    -- Track this attempt
-    local attempt_count = stats.track_attempt(current_file)
-    
     -- Read template content
     local template_content = vim.fn.readfile(template_file)
     if not template_content then
@@ -115,6 +112,9 @@ function M.validate_practice()
     
     -- Show results
     if #differences == 0 then
+        -- Track this attempt only if it was successful
+        local attempt_count = stats.track_attempt(current_file)
+        
         -- Check if this is the first successful validation
         local is_first_success = attempt_count == 1
         
