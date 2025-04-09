@@ -461,31 +461,29 @@ function M.show_success_message(pattern_name, is_first_validation, current_time)
         table.insert(success_message, string.format("  • Total Practices: %d", total_practices))
         table.insert(success_message, string.format("  • First Attempt Success Rate: %.1f%%", success_rate))
         
-        -- Calculate progress based on achievement levels
-        local level, emoji = stats.get_achievement_level(total_practices, first_attempt_successes)
-        local progress_width = 20
-        local progress_filled = 0
-        
         -- Calculate progress based on current level and next level requirements
         if total_practices >= 100 and success_rate >= 80 then
             -- Master level (100%)
             progress_filled = progress_width
         elseif total_practices >= 50 and success_rate >= 70 then
-            -- Expert level (75%)
-            progress_filled = math.floor(progress_width * 0.75)
+            -- Expert level (75-100%)
+            local progress_toward_master = math.min((total_practices - 50) / 50, 1)
+            progress_filled = math.floor(progress_width * progress_toward_master)
         elseif total_practices >= 25 and success_rate >= 60 then
-            -- Advanced level (50%)
-            progress_filled = math.floor(progress_width * 0.5)
+            -- Advanced level (50-75%)
+            local progress_toward_expert = math.min((total_practices - 25) / 25, 1)
+            progress_filled = math.floor(progress_width * progress_toward_expert)
         elseif total_practices >= 10 and success_rate >= 50 then
-            -- Intermediate level (25%)
-            progress_filled = math.floor(progress_width * 0.25)
+            -- Intermediate level (25-50%)
+            local progress_toward_advanced = math.min((total_practices - 10) / 15, 1)
+            progress_filled = math.floor(progress_width * progress_toward_advanced)
         else
             -- Beginner level (0-25%)
             -- Calculate progress as a combination of practices and success rate
             local practice_progress = math.min(total_practices / 10, 1)  -- Progress toward intermediate
-            local success_progress = success_rate / 50  -- Progress toward 50% success rate
+            local success_progress = math.min(success_rate / 50, 1)  -- Progress toward 50% success rate
             local combined_progress = (practice_progress + success_progress) / 2
-            progress_filled = math.floor(progress_width * combined_progress * 0.25)
+            progress_filled = math.floor(progress_width * combined_progress)
         end
         
         local progress_bar = string.rep("█", progress_filled) .. string.rep("░", progress_width - progress_filled)
