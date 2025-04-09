@@ -378,15 +378,60 @@ end
 -- Show practice progress
 function M.show_progress()
     local stats = require("scales.stats")
-    local progress = stats.get_progress()
+    local patterns = require("scales.patterns").patterns
+    
+    -- Calculate overall progress
+    local total_patterns = vim.tbl_count(patterns)
+    local patterns_mastered = 0
+    local total_attempts = 0
+    local successful_attempts = 0
+    local pattern_progress = {}
+    
+    -- Calculate progress for each pattern
+    for pattern_name, _ in pairs(patterns) do
+        local timing_stats = stats.practice_log.timing_stats[pattern_name] or {}
+        local total_practices = timing_stats.total_practices or 0
+        local first_attempt_successes = timing_stats.first_attempt_successes or 0
+        local attempts = stats.practice_log.attempt_stats[pattern_name] or 0
+        local successes = stats.practice_log.validated_practices[pattern_name] and 1 or 0
+        
+        -- Calculate progress percentage
+        local progress = 0
+        if total_practices > 0 then
+            progress = math.floor((first_attempt_successes / total_practices) * 100)
+        end
+        
+        -- Count as mastered if progress is 100%
+        if progress == 100 then
+            patterns_mastered = patterns_mastered + 1
+        end
+        
+        -- Update attempt statistics
+        total_attempts = total_attempts + attempts
+        successful_attempts = successful_attempts + successes
+        
+        -- Store pattern progress
+        pattern_progress[pattern_name] = {
+            progress = progress,
+            attempts = attempts,
+            successes = successes,
+            timing_stats = timing_stats
+        }
+    end
+    
+    -- Calculate overall progress
+    local overall_progress = math.floor((patterns_mastered / total_patterns) * 100)
+    
+    -- Calculate success rate
+    local success_rate = total_attempts > 0 and math.floor((successful_attempts / total_attempts) * 100) or 0
     
     local content = {
         "╭──────────────────────────────────────────────────────────────────────────────╮",
         "│                                📊 PRACTICE PROGRESS 📊                        │",
         "╰──────────────────────────────────────────────────────────────────────────────╯",
         "",
-        string.format("  🎯 Overall Progress: %d%%", progress.overall_progress),
-        string.format("  🎸 Patterns Mastered: %d/%d", progress.patterns_mastered, progress.total_patterns),
+        string.format("  🎯 Overall Progress: %d%%", overall_progress),
+        string.format("  🎸 Patterns Mastered: %d/%d", patterns_mastered, total_patterns),
         "",
         "  🎯 Pattern Progress",
         "  ═════════════════════════════════════════════════════════════════════════════"
@@ -394,13 +439,13 @@ function M.show_progress()
     
     -- Sort patterns by progress percentage
     local sorted_patterns = {}
-    for pattern, data in pairs(progress.pattern_progress) do
+    for pattern, data in pairs(pattern_progress) do
         table.insert(sorted_patterns, {
             name = pattern,
             progress = data.progress,
             attempts = data.attempts,
             successes = data.successes,
-            timing_stats = stats.practice_log.timing_stats[pattern] or {}
+            timing_stats = data.timing_stats
         })
     end
     table.sort(sorted_patterns, function(a, b) return a.progress > b.progress end)
@@ -472,9 +517,9 @@ function M.show_progress()
     -- Add attempt statistics with fancy header
     table.insert(content, "  🎯 Global Statistics")
     table.insert(content, "  ═════════════════════════════════════════════════════════════════════════════")
-    table.insert(content, string.format("    • Total Attempts: %d", progress.total_attempts))
-    table.insert(content, string.format("    • Successful Attempts: %d", progress.successful_attempts))
-    table.insert(content, string.format("    • Success Rate: %d%%", progress.success_rate))
+    table.insert(content, string.format("    • Total Attempts: %d", total_attempts))
+    table.insert(content, string.format("    • Successful Attempts: %d", successful_attempts))
+    table.insert(content, string.format("    • Success Rate: %d%%", success_rate))
     
     -- Add footer
     table.insert(content, "")
