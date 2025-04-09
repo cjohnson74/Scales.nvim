@@ -310,7 +310,7 @@ function M.record_validation(pattern_name, attempt_count)
             last_time = 0,
             best_time = 0,
             total_practices = 0,
-            first_attempt_successes = attempt_count == 1 and 1 or 0,  -- Initialize based on attempt count
+            first_attempt_successes = 0,
             previous_time = 0
         }
     end
@@ -328,8 +328,10 @@ function M.record_validation(pattern_name, attempt_count)
     stats.total_practices = (stats.total_practices or 0) + 1
     
     -- Track first-attempt successes
-    if attempt_count == 1 then
-        stats.first_attempt_successes = (stats.first_attempt_successes or 0) + 1
+    -- Only count as first attempt success if this is the first successful validation
+    -- and it was completed on the first attempt
+    if attempt_count == 1 and stats.total_practices == 1 then
+        stats.first_attempt_successes = 1
     end
     
     -- Update best time if this is better
