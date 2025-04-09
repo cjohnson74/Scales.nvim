@@ -461,6 +461,11 @@ function M.show_success_message(pattern_name, is_first_validation, current_time)
         table.insert(success_message, string.format("  • Total Practices: %d", total_practices))
         table.insert(success_message, string.format("  • First Attempt Success Rate: %.1f%%", success_rate))
         
+        -- Calculate progress based on achievement levels
+        local level, emoji = stats.get_achievement_level(total_practices, first_attempt_successes)
+        local progress_width = 20
+        local progress_filled = 0
+        
         -- Calculate progress based on current level and next level requirements
         if total_practices >= 100 and success_rate >= 80 then
             -- Master level (100%)
