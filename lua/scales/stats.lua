@@ -257,21 +257,25 @@ end
 -- Get achievement level based on practice count and first-attempt success rate
 function M.get_achievement_level(practice_count, first_attempt_successes)
     if practice_count == 0 then
-        return "Beginner", "🌱"
+        return "Hatchling", "🐣"
     end
     
     local success_rate = first_attempt_successes / practice_count
     
-    if practice_count >= 100 and success_rate >= 0.8 then
-        return "Master", "🏆"
+    if practice_count >= 200 and success_rate >= 0.9 then
+        return "Celestial Dragon", "🐲"  -- Supreme mastery, mythical and powerful
+    elseif practice_count >= 150 and success_rate >= 0.85 then
+        return "Elder Dragon", "🐉"  -- Ancient wisdom and experience
+    elseif practice_count >= 100 and success_rate >= 0.8 then
+        return "Mystic Unicorn", "🦄"  -- Rare and exceptional skill
     elseif practice_count >= 50 and success_rate >= 0.7 then
-        return "Expert", "🌟"
+        return "Noble Lion", "🦁"  -- Strong and confident
     elseif practice_count >= 25 and success_rate >= 0.6 then
-        return "Advanced", "⭐"
+        return "Rising Phoenix", "🦚"  -- Reborn through practice
     elseif practice_count >= 10 and success_rate >= 0.5 then
-        return "Intermediate", "🌱"
+        return "Soaring Eagle", "🦅"  -- Gaining altitude in skills
     else
-        return "Beginner", "🌱"
+        return "Hatchling", "🐣"  -- Just starting the journey
     end
 end
 
