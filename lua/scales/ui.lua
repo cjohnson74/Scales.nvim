@@ -606,7 +606,7 @@ function M.show_success_message(pattern_name, is_first_validation, timing_stats)
     }
     
     -- Add timing information if available
-    if timing_stats and timing_stats.last_time > 0 then
+    if timing_stats and type(timing_stats) == "table" and timing_stats.last_time > 0 then
         -- Add current attempt time with milliseconds
         local time_str = string.format("%.3f seconds", timing_stats.last_time)
         table.insert(success_message, string.format("  ⏱️ Time taken: %s", time_str))

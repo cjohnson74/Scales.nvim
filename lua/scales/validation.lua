@@ -103,7 +103,7 @@ function M.validate_practice()
         local timing_stats = stats.record_validation(pattern_name, current_attempt)
         
         -- Show success message with timing information
-        ui.show_success_message(pattern_name, is_first_success, timing_stats.last_time)
+        ui.show_success_message(pattern_name, is_first_success, timing_stats)
     else
         -- Show differences
         local diff_lines = {"❌ Your implementation doesn't match the template:"}
