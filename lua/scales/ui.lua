@@ -5,25 +5,33 @@ M.config = {}  -- Will be set by core.lua
 -- Import required modules
 local patterns = require('scales.patterns')
 local stats = require('scales.stats')
+local utils = require('scales.utils')
+
+-- Constants
+local BORDER = {
+    TOP_LEFT = "╭",
+    TOP_RIGHT = "╮",
+    BOTTOM_LEFT = "╰",
+    BOTTOM_RIGHT = "╯",
+    HORIZONTAL = "─",
+    VERTICAL = "│"
+}
+
+local EMOJI = {
+    SUCCESS = "🎉",
+    PATTERN = "🎸",
+    TIME = "⏱️",
+    TROPHY = "🏆",
+    UP = "📈",
+    DOWN = "📉",
+    STATS = "📊",
+    TARGET = "🎯",
+    STAR = "⭐",
+    LIGHT = "💡"
+}
 
 -- Track open windows for cleanup
 local open_windows = {}
-
--- Format time in a human-readable way
-local function format_time(seconds)
-    if not seconds or seconds <= 0 then
-        return "0 seconds"
-    end
-    
-    local minutes = math.floor(seconds / 60)
-    local remaining_seconds = math.floor(seconds % 60)
-    
-    if minutes > 0 then
-        return string.format("%d minutes and %d seconds", minutes, remaining_seconds)
-    else
-        return string.format("%d seconds", remaining_seconds)
-    end
-end
 
 -- Cleanup function to close all open windows
 function M.cleanup()
@@ -101,6 +109,7 @@ function M.show_popup(content, opts)
     local display_content = {}
     if opts.title then
         local title_text = type(opts.title) == "table" and opts.title.title or opts.title
+        table.insert(display_content, string.format("%s%s%s", BORDER.TOP_LEFT, string.rep(BORDER.HORIZONTAL, 58), BORDER.TOP_RIGHT))
         table.insert(display_content, "╭" .. string.rep("─", 58) .. "╮")
         table.insert(display_content, "│" .. string.rep(" ", math.floor((58 - #title_text) / 2)) .. title_text .. string.rep(" ", math.ceil((58 - #title_text) / 2)) .. "│")
         table.insert(display_content, "╰" .. string.rep("─", 58) .. "╯")
@@ -585,7 +594,7 @@ function M.show_progress()
 end
 
 -- Show success message
-function M.show_success_message(pattern_name, is_first_validation, current_time)
+function M.show_success_message(pattern_name, is_first_validation, timing_stats)
     local stats = require('scales.stats')
     
     local success_message = {
@@ -597,7 +606,6 @@ function M.show_success_message(pattern_name, is_first_validation, current_time)
     }
     
     -- Add timing information if available
-    local timing_stats = stats.practice_log.timing_stats[pattern_name]
     if timing_stats and timing_stats.last_time > 0 then
         -- Add current attempt time with milliseconds
         local time_str = string.format("%.3f seconds", timing_stats.last_time)
@@ -642,44 +650,44 @@ function M.show_success_message(pattern_name, is_first_validation, current_time)
                     improvement_str))
             end
         end
-        
-        -- Add practice progress
-        local total_practices = timing_stats.total_practices or 0
-        local first_attempt_successes = timing_stats.first_attempt_successes or 0
-        local success_rate = total_practices > 0 and (first_attempt_successes / total_practices) * 100 or 0
-        
-        table.insert(success_message, "")
-        table.insert(success_message, "  📊 Practice Progress")
-        table.insert(success_message, "  ════════════════════════════════════════════")
-        table.insert(success_message, string.format("    • Total Practices: %d", total_practices))
-        table.insert(success_message, string.format("    • First Attempt Success Rate: %.1f%%", success_rate))
-        
-        -- Get current level and calculate progress toward next level
-        local level_name, level_emoji = stats.get_achievement_level(total_practices, first_attempt_successes)
-        local progress_filled, progress_width = calculate_progress(total_practices, first_attempt_successes)
-        
-        local progress_bar = string.rep("█", progress_filled) .. string.rep("░", progress_width - progress_filled)
-        table.insert(success_message, string.format("    • Mastery Level: %s %s", level_emoji, level_name))
-        table.insert(success_message, string.format("    • Progress: [%s]", progress_bar))
-        
-        -- Add next level requirements with fancy arrows
-        if level_name == "Hatchling" then
-            table.insert(success_message, "    • Next Level: 10 practices with 50% first-attempt success → Soaring Eagle")
-        elseif level_name == "Soaring Eagle" then
-            table.insert(success_message, "    • Next Level: 25 practices with 60% first-attempt success → Rising Phoenix")
-        elseif level_name == "Rising Phoenix" then
-            table.insert(success_message, "    • Next Level: 50 practices with 70% first-attempt success → Noble Lion")
-        elseif level_name == "Noble Lion" then
-            table.insert(success_message, "    • Next Level: 100 practices with 80% first-attempt success → Mystic Unicorn")
-        elseif level_name == "Mystic Unicorn" then
-            table.insert(success_message, "    • Next Level: 150 practices with 85% first-attempt success → Elder Dragon")
-        elseif level_name == "Elder Dragon" then
-            table.insert(success_message, "    • Next Level: 200 practices with 90% first-attempt success → Celestial Dragon")
-        elseif level_name == "Celestial Dragon" then
-            table.insert(success_message, "    • ⭐ You have reached the highest level! ⭐")
-            table.insert(success_message, "    • 🎉 Congratulations on achieving mastery! 🎉")
-            table.insert(success_message, "    • ✨ Your dedication has been rewarded ✨")
-        end
+    end
+    
+    -- Add practice progress
+    local total_practices = timing_stats.total_practices or 0
+    local first_attempt_successes = timing_stats.first_attempt_successes or 0
+    local success_rate = total_practices > 0 and (first_attempt_successes / total_practices) * 100 or 0
+    
+    table.insert(success_message, "")
+    table.insert(success_message, "  📊 Practice Progress")
+    table.insert(success_message, "  ════════════════════════════════════════════")
+    table.insert(success_message, string.format("    • Total Practices: %d", total_practices))
+    table.insert(success_message, string.format("    • First Attempt Success Rate: %.1f%%", success_rate))
+    
+    -- Get current level and calculate progress toward next level
+    local level_name, level_emoji = stats.get_achievement_level(total_practices, first_attempt_successes)
+    local progress_filled, progress_width = calculate_progress(total_practices, first_attempt_successes)
+    
+    local progress_bar = string.rep("█", progress_filled) .. string.rep("░", progress_width - progress_filled)
+    table.insert(success_message, string.format("    • Mastery Level: %s %s", level_emoji, level_name))
+    table.insert(success_message, string.format("    • Progress: [%s]", progress_bar))
+    
+    -- Add next level requirements with fancy arrows
+    if level_name == "Hatchling" then
+        table.insert(success_message, "    • Next Level: 10 practices with 50% first-attempt success → Soaring Eagle")
+    elseif level_name == "Soaring Eagle" then
+        table.insert(success_message, "    • Next Level: 25 practices with 60% first-attempt success → Rising Phoenix")
+    elseif level_name == "Rising Phoenix" then
+        table.insert(success_message, "    • Next Level: 50 practices with 70% first-attempt success → Noble Lion")
+    elseif level_name == "Noble Lion" then
+        table.insert(success_message, "    • Next Level: 100 practices with 80% first-attempt success → Mystic Unicorn")
+    elseif level_name == "Mystic Unicorn" then
+        table.insert(success_message, "    • Next Level: 150 practices with 85% first-attempt success → Elder Dragon")
+    elseif level_name == "Elder Dragon" then
+        table.insert(success_message, "    • Next Level: 200 practices with 90% first-attempt success → Celestial Dragon")
+    elseif level_name == "Celestial Dragon" then
+        table.insert(success_message, "    • ⭐ You have reached the highest level! ⭐")
+        table.insert(success_message, "    • 🎉 Congratulations on achieving mastery! 🎉")
+        table.insert(success_message, "    • ✨ Your dedication has been rewarded ✨")
     end
     
     table.insert(success_message, "")
@@ -693,7 +701,12 @@ function M.show_success_message(pattern_name, is_first_validation, current_time)
     else
         table.insert(success_message, "    • 💡 Practice makes perfect!")
         table.insert(success_message, "    • Try implementing faster next time")
+        table.insert(success_message, "    • Note: This attempt doesn't count toward your progress")
+        table.insert(success_message, "      because the goal is to get it right on the first try")
+        table.insert(success_message, "      to build true pattern recognition skills")
     end
+    
+    -- Common next steps for all attempts
     table.insert(success_message, "    • Experiment with different approaches")
     table.insert(success_message, "    • Move on to a more challenging pattern")
     

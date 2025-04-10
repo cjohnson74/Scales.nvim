@@ -4,6 +4,7 @@ M.config = {}  -- Will be set by core.lua
 
 local stats = require('scales.stats')
 local ui = require('scales.ui')
+local utils = require('scales.utils')
 
 -- Track attempt counts
 local attempt_counts = {}  -- Track attempts per file
@@ -11,32 +12,6 @@ local attempt_counts = {}  -- Track attempts per file
 -- Reset attempt counts for a file
 function M.reset_attempts(file_path)
     attempt_counts[file_path] = nil
-end
-
--- Format time in a human-readable way
-local function format_time(seconds)
-    if not seconds or seconds <= 0 then
-        return "0 seconds"
-    end
-    
-    local minutes = math.floor(seconds / 60)
-    local remaining_seconds = math.floor(seconds % 60)
-    
-    if minutes > 0 then
-        return string.format("%d minutes and %d seconds", minutes, remaining_seconds)
-    else
-        return string.format("%d seconds", remaining_seconds)
-    end
-end
-
--- Helper function to strip comments and normalize whitespace
-local function process_line(line)
-    -- Remove comments and normalize in one pass
-    line = line:gsub("%s*#.*$", ""):gsub("^%s*#.*$", "")
-    -- Normalize whitespace while preserving indentation
-    local leading_ws = line:match("^(%s*)")
-    local content = line:gsub("%s*$", ""):gsub("%s+", " ")
-    return leading_ws .. content
 end
 
 -- Validate practice implementation
@@ -89,14 +64,14 @@ function M.validate_practice()
     local practice_lines = {}
     
     for _, line in ipairs(template_content) do
-        local processed = process_line(line)
+        local processed = utils.process_line(line)
         if not processed:match("^%s*$") then
             table.insert(template_lines, processed)
         end
     end
     
     for _, line in ipairs(practice_content) do
-        local processed = process_line(line)
+        local processed = utils.process_line(line)
         if not processed:match("^%s*$") then
             table.insert(practice_lines, processed)
         end
