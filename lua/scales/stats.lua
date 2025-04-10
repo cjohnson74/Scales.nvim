@@ -350,9 +350,11 @@ function M.record_validation(pattern_name, attempt_count)
         stats.first_attempt_successes = (stats.first_attempt_successes or 0) + 1
     end
     
-    -- Update best time if this is better
-    if stats.best_time == 0 or current_time < stats.best_time then
-        stats.best_time = current_time
+    -- Only update best time if this is a successful validation
+    if attempt_count == 1 then
+        if stats.best_time == 0 or current_time < stats.best_time then
+            stats.best_time = current_time
+        end
     end
     
     -- Save stats after update
