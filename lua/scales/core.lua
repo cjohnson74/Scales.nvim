@@ -111,6 +111,9 @@ function M.generate_practice(pattern_name)
         end
     end
 
+    -- Reset session validation tracker
+    stats.reset_session_validation()
+
     -- If no pattern specified, choose randomly
     if not pattern_name or pattern_name == "" then
         local pattern_keys = vim.tbl_keys(patterns.patterns)
