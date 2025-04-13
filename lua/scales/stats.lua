@@ -331,12 +331,20 @@ end
 function M.record_validation(pattern_name, attempt_count)
     -- Check if this pattern was already validated in this session
     if session_validation_tracker[pattern_name] then
+        -- Return current stats without updating
+        local stats = M.practice_log.timing_stats[pattern_name] or {
+            last_time = 0,
+            best_time = 0,
+            previous_time = 0,
+            total_practices = 0,
+            first_attempt_successes = 0
+        }
         return {
-            last_time = M.practice_log.timing_stats[pattern_name].last_time,
-            best_time = M.practice_log.timing_stats[pattern_name].best_time,
-            previous_time = M.practice_log.timing_stats[pattern_name].previous_time,
-            total_practices = M.practice_log.timing_stats[pattern_name].total_practices,
-            first_attempt_successes = M.practice_log.timing_stats[pattern_name].first_attempt_successes
+            last_time = stats.last_time,
+            best_time = stats.best_time,
+            previous_time = stats.previous_time,
+            total_practices = stats.total_practices,
+            first_attempt_successes = stats.first_attempt_successes
         }
     end
 
@@ -362,18 +370,21 @@ function M.record_validation(pattern_name, attempt_count)
     -- Update statistics
     stats.last_time = current_time
     
-    -- Only increment practice count and update best time if this is a successful validation
+    -- Increment practice count for every successful validation
+    stats.total_practices = (stats.total_practices or 0) + 1
+    
+    -- Only count as first attempt success if this is the first attempt
     if attempt_count == 1 then
-        stats.total_practices = (stats.total_practices or 0) + 1
         stats.first_attempt_successes = (stats.first_attempt_successes or 0) + 1
-        
-        if stats.best_time == 0 or current_time < stats.best_time then
-            stats.best_time = current_time
-        end
-        
-        -- Mark this pattern as validated in this session
-        session_validation_tracker[pattern_name] = true
     end
+    
+    -- Update best time if this is better
+    if stats.best_time == 0 or current_time < stats.best_time then
+        stats.best_time = current_time
+    end
+    
+    -- Mark this pattern as validated in this session
+    session_validation_tracker[pattern_name] = true
     
     -- Save stats after update
     M.save_stats()

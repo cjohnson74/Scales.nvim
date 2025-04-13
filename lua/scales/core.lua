@@ -193,6 +193,9 @@ function M.reset_practice()
     -- Reset validation flag for this pattern
     stats.practice_log.validated_practices[pattern_name] = nil
     
+    -- Reset session validation tracker
+    stats.reset_session_validation()
+    
     -- Open the reset file
     vim.cmd('edit ' .. current_file)
 end
