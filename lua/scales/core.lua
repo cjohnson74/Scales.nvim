@@ -190,6 +190,9 @@ function M.reset_practice()
     -- Reset attempt counts
     validation.reset_attempts(current_file)
     
+    -- Reset validation flag for this pattern
+    stats.practice_log.validated_practices[pattern_name] = nil
+    
     -- Open the reset file
     vim.cmd('edit ' .. current_file)
 end
