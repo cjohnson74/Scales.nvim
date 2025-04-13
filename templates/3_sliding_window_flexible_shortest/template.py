@@ -1,10 +1,22 @@
 def sliding_window_flexible_shortest(input):
-    initialize window, ans
+    # Initialize window and answer
+    window = []
+    ans = input.copy()  # Initialize with worst case (entire input)
     left = 0
+    
+    # Slide window through the input
     for right in range(len(input)):
-        append input[right] to window
+        # Add current element to window
+        window.append(input[right])
+        
+        # While window is valid, try to make it shorter
         while valid(window):
-            ans = min(ans, window)  # window is guaranteed to be valid here
-            remove input[left] from window
+            # Update answer if current window is better
+            if len(window) < len(ans):
+                ans = window.copy()
+            
+            # Remove leftmost element to try shorter window
+            window.pop(0)
             left += 1
+    
     return ans
